@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 data class ScheduleUiState(
     val courses: List<Course> = emptyList(),
@@ -40,4 +41,7 @@ class ScheduleViewModel @Inject constructor(
         val week = if (semester != null) WeekCalculator.currentWeek(semester.startDate) else 1
         ScheduleUiState(courses, active, semester, week, week)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ScheduleUiState())
+
+    fun saveCourse(course: Course) = viewModelScope.launch { courseRepo.upsert(course) }
+    fun deleteCourse(id: Long) = viewModelScope.launch { courseRepo.delete(id) }
 }

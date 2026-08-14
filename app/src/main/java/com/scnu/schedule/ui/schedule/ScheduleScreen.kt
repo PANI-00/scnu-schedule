@@ -33,6 +33,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.scnu.schedule.domain.logic.WeekCalculator
+import com.scnu.schedule.domain.model.Course
+import com.scnu.schedule.domain.model.WeekKind
+import com.scnu.schedule.domain.model.WeekPattern
 import com.scnu.schedule.ui.theme.LocalAppPalette
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.launch
@@ -51,6 +54,8 @@ fun ScheduleScreen(vm: ScheduleViewModel = hiltViewModel()) {
     }
     val scope = rememberCoroutineScope()
     var showJump by remember { mutableStateOf(false) }
+    var editing by remember { mutableStateOf<Course?>(null) }
+    var creatingDay by remember { mutableStateOf<Int?>(null) }
 
     Column(Modifier.fillMaxSize()) {
         // 顶栏：周标题 + 左右箭头
@@ -70,7 +75,7 @@ fun ScheduleScreen(vm: ScheduleViewModel = hiltViewModel()) {
 
         HorizontalPager(state = pagerState) { page ->
             // page index p → week = p + 1
-            WeeklyGrid(state = state, week = page + 1)
+            WeeklyGrid(state = state, week = page + 1, onEmptyClick = { day -> creatingDay = day }, onCourseClick = { course -> editing = course })
         }
 
         if (showJump) {
@@ -81,11 +86,22 @@ fun ScheduleScreen(vm: ScheduleViewModel = hiltViewModel()) {
                 onJump = { week -> scope.launch { pagerState.scrollToPage(week - 1) }; showJump = false },
             )
         }
+
+        if (editing != null || creatingDay != null) {
+            val init = editing ?: Course(name = "", dayOfWeek = creatingDay ?: 1, startPeriod = 1, endPeriod = 2, weekPattern = WeekPattern(WeekKind.ALL))
+            CourseEditDialog(
+                initial = init,
+                periodCount = state.timetable?.periodCount ?: 10,
+                onDismiss = { editing = null; creatingDay = null },
+                onSave = { vm.saveCourse(it) },
+                onDelete = editing?.let { e -> { vm.deleteCourse(e.id) } },
+            )
+        }
     }
 }
 
 @Composable
-private fun WeeklyGrid(state: ScheduleUiState, week: Int) {
+private fun WeeklyGrid(state: ScheduleUiState, week: Int, onEmptyClick: (Int) -> Unit, onCourseClick: (Course) -> Unit) {
     val p = LocalAppPalette.current
     val rowHeight = 48
     // 本周日期 = weekDates(startDate, week - 1) —— 绝对周号，不是相对偏移
@@ -117,13 +133,14 @@ private fun WeeklyGrid(state: ScheduleUiState, week: Int) {
                         Column {
                             state.timetable?.periods?.forEach { _ ->
                                 Box(Modifier.height(rowHeight.dp).fillMaxWidth().padding(vertical = 1.dp)
-                                    .background(p.surfaceSoft, RoundedCornerShape(if (p.isDark) 2.dp else 8.dp)))
+                                    .background(p.surfaceSoft, RoundedCornerShape(if (p.isDark) 2.dp else 8.dp))
+                                    .clickable { onEmptyClick(day) })
                             }
                         }
                         dayCourses.forEach { course ->
                             val color = p.coursePalette[course.colorIndex % p.coursePalette.size]
                             Box(Modifier.offset(y = ((course.startPeriod - 1) * rowHeight).dp).fillMaxWidth()) {
-                                CourseBlock(course, color, rowHeight) { /* Task 13 编辑 */ }
+                                CourseBlock(course, color, rowHeight) { onCourseClick(course) }
                             }
                         }
                     }
