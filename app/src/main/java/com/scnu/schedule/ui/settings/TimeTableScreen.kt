@@ -75,8 +75,8 @@ fun TimeTableScreen(vm: TimeTableViewModel = hiltViewModel()) {
                     TextButton({
                         val startDate = runCatching { LocalDate.parse(start.trim()) }.getOrNull()
                         val weeksInt = weeks.trim().toIntOrNull()
-                        if (startDate == null || weeksInt == null || weeksInt <= 0) {
-                            err = "开学日期需 YYYY-MM-DD，周数为正整数"
+                        if (startDate == null || startDate.dayOfWeek != java.time.DayOfWeek.MONDAY || weeksInt == null || weeksInt <= 0) {
+                            err = "开学日期需 YYYY-MM-DD 且为周一，周数为正整数"
                         } else {
                             vm.updateSemester(Semester(id = 0, name = name.ifBlank { "学期" }, startDate = startDate, totalWeeks = weeksInt))
                             showSemesterEdit = false
@@ -107,7 +107,9 @@ fun TimeTableScreen(vm: TimeTableViewModel = hiltViewModel()) {
                     }) { Text("+ 加一节") }
                     TextButton({ editingTt = null }) { Text("取消") }
                     TextButton({
-                        if (tt.id == 0L) vm.addTimeTable(name, periods) else vm.savePeriods(tt.copy(name = name), periods.map { it.copy(id = 0) })
+                        val safeName = name.ifBlank { "自定义" }
+                        val safePeriods = if (periods.isEmpty()) listOf(Period(periodIndex = 1, startMinute = 510, endMinute = 550)) else periods
+                        if (tt.id == 0L) vm.addTimeTable(safeName, safePeriods) else vm.savePeriods(tt.copy(name = safeName), safePeriods.map { it.copy(id = 0) })
                         editingTt = null
                     }) { Text("保存") }
                 }
