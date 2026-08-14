@@ -46,6 +46,12 @@ interface TimeTableDao {
     @Query("DELETE FROM timetables WHERE id = :id")
     suspend fun deleteTimetable(id: Long)
 
+    @androidx.room.Transaction
+    suspend fun replacePeriods(timetableId: Long, periods: List<PeriodEntity>) {
+        deletePeriods(timetableId)
+        upsertPeriods(periods)
+    }
+
     @Query("SELECT COUNT(*) FROM timetables")
     suspend fun count(): Int
 }
