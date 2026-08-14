@@ -22,7 +22,10 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 
 @Composable
-fun SettingsScreen(vm: SettingsViewModel = hiltViewModel()) {
+fun SettingsScreen(
+    onOpenTimeTable: () -> Unit = {},
+    vm: SettingsViewModel = hiltViewModel(),
+) {
     val theme by vm.theme.collectAsState(initial = AppThemeType.CLAUDE)
     val semester by vm.semester.collectAsState(initial = Semester(startDate = LocalDate.now().with(DayOfWeek.MONDAY)))
     val p = LocalAppPalette.current
@@ -45,6 +48,6 @@ fun SettingsScreen(vm: SettingsViewModel = hiltViewModel()) {
         Text("开学 ${semester.startDate} · 共 ${semester.totalWeeks} 周", fontSize = 12.sp, color = p.muted)
 
         Text("作息时间", fontSize = 14.sp, color = p.muted, modifier = Modifier.padding(top = 20.dp))
-        Text("管理节次时段 →", fontSize = 15.sp, color = p.primary)
+        Text("管理节次时段 →", fontSize = 15.sp, color = p.primary, modifier = Modifier.clickable { onOpenTimeTable() })
     }
 }

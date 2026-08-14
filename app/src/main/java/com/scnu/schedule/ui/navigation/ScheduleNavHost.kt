@@ -21,6 +21,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.scnu.schedule.ui.schedule.ScheduleScreen
 import com.scnu.schedule.ui.settings.SettingsScreen
+import com.scnu.schedule.ui.settings.TimeTableScreen
 import com.scnu.schedule.ui.today.TodayScreen
 
 private data class Tab(val route: String, val label: String, val icon: ImageVector)
@@ -58,7 +59,8 @@ fun ScheduleNavHost() {
         NavHost(nav, startDestination = "schedule", modifier = Modifier.padding(padding)) {
             composable("today") { TodayScreen() }
             composable("schedule") { ScheduleScreen() }
-            composable("settings") { SettingsScreen() }
+            composable("timetable") { TimeTableScreen() }
+            composable("settings") { SettingsScreen(onOpenTimeTable = { nav.navigate("timetable") }) }
         }
     }
 }
