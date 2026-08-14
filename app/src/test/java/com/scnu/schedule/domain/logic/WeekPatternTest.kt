@@ -38,4 +38,9 @@ class WeekPatternTest {
         assertTrue(odd16.overlaps(all20))
         assertFalse(odd16.overlaps(WeekPattern(WeekKind.EVEN, 1, 16)))
     }
+
+    @Test fun `custom week pattern overlaps detection`() {
+        assertTrue(custom.overlaps(all))                              // {1,3,9} ∩ {1..20} ≠ ∅
+        assertFalse(custom.overlaps(WeekPattern(WeekKind.EVEN, 1, 16))) // 奇数周 vs 偶数周 → 无交集
+    }
 }
