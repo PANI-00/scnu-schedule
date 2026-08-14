@@ -23,7 +23,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -47,6 +50,7 @@ fun ScheduleScreen(vm: ScheduleViewModel = hiltViewModel()) {
         pagerState.scrollToPage(state.initialWeek - 1)
     }
     val scope = rememberCoroutineScope()
+    var showJump by remember { mutableStateOf(false) }
 
     Column(Modifier.fillMaxSize()) {
         // 顶栏：周标题 + 左右箭头
@@ -55,8 +59,8 @@ fun ScheduleScreen(vm: ScheduleViewModel = hiltViewModel()) {
             Text("◂", color = p.primary, fontSize = 16.sp, modifier = Modifier.clickable {
                 scope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
             })
-            Text("第 ${pagerState.currentPage + 1} 周", color = p.ink, fontSize = 14.sp,
-                modifier = Modifier.padding(horizontal = 12.dp))
+            Text("第 ${pagerState.currentPage + 1} 周 ⌄", color = p.ink, fontSize = 14.sp,
+                modifier = Modifier.padding(horizontal = 12.dp).clickable { showJump = true })
             Text("▸", color = p.primary, fontSize = 16.sp, modifier = Modifier.clickable {
                 scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
             })
@@ -67,6 +71,15 @@ fun ScheduleScreen(vm: ScheduleViewModel = hiltViewModel()) {
         HorizontalPager(state = pagerState) { page ->
             // page index p → week = p + 1
             WeeklyGrid(state = state, week = page + 1)
+        }
+
+        if (showJump) {
+            WeekJumpSheet(
+                totalWeeks = state.semester?.totalWeeks ?: 20,
+                currentWeek = pagerState.currentPage + 1,
+                onDismiss = { showJump = false },
+                onJump = { week -> scope.launch { pagerState.scrollToPage(week - 1) }; showJump = false },
+            )
         }
     }
 }
