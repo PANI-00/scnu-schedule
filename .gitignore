@@ -1,0 +1,30 @@
+# Gradle
+.gradle/
+build/
+*/build/
+
+# Local configuration
+local.properties
+
+# IDE
+.idea/
+*.iml
+.vscode/
+captures/
+
+# Android
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+*.jar
+*.war
+*.ear
+output.json
+
+# Kotlin
+.kotlin/
+
+# 视觉伴侣 mockup（本机讨论产物，不进版本库）
+.superpowers/
