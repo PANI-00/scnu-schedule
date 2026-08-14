@@ -20,9 +20,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,8 +42,10 @@ private val weekdays = listOf("一", "二", "三", "四", "五")
 fun ScheduleScreen(vm: ScheduleViewModel = hiltViewModel()) {
     val state by vm.uiState.collectAsState()
     val p = LocalAppPalette.current
-    val initialWeek = remember { state.initialWeek }
-    val pagerState = rememberPagerState(initialPage = initialWeek - 1) { 99 }
+    val pagerState = rememberPagerState(initialPage = 0) { 99 }
+    LaunchedEffect(state.initialWeek) {
+        pagerState.scrollToPage(state.initialWeek - 1)
+    }
     val scope = rememberCoroutineScope()
 
     Column(Modifier.fillMaxSize()) {
