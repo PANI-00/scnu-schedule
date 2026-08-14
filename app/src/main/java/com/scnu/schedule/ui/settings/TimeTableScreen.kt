@@ -107,7 +107,7 @@ fun TimeTableScreen(vm: TimeTableViewModel = hiltViewModel()) {
                     }) { Text("+ 加一节") }
                     TextButton({ editingTt = null }) { Text("取消") }
                     TextButton({
-                        if (tt.id == 0L) vm.addTimeTable(name, periods) else vm.savePeriods(tt, periods.map { it.copy(id = 0) })
+                        if (tt.id == 0L) vm.addTimeTable(name, periods) else vm.savePeriods(tt.copy(name = name), periods.map { it.copy(id = 0) })
                         editingTt = null
                     }) { Text("保存") }
                 }
