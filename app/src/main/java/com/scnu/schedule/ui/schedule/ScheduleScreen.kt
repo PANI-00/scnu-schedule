@@ -1,6 +1,8 @@
 package com.scnu.schedule.ui.schedule
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,6 +13,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -18,6 +22,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -26,37 +32,64 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.scnu.schedule.domain.logic.WeekCalculator
 import com.scnu.schedule.ui.theme.LocalAppPalette
 import java.time.format.DateTimeFormatter
+import kotlinx.coroutines.launch
 
 private val dateFormatter = DateTimeFormatter.ofPattern("MM/dd")
 private val weekdays = listOf("一", "二", "三", "四", "五")
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ScheduleScreen(vm: ScheduleViewModel = hiltViewModel()) {
     val state by vm.uiState.collectAsState()
     val p = LocalAppPalette.current
-    val timetable = state.timetable
+    val initialWeek = remember { state.initialWeek }
+    val pagerState = rememberPagerState(initialPage = initialWeek - 1) { 99 }
+    val scope = rememberCoroutineScope()
+
+    Column(Modifier.fillMaxSize()) {
+        // 顶栏：周标题 + 左右箭头
+        Row(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text("课表", fontSize = 16.sp, color = p.ink, modifier = Modifier.weight(1f))
+            Text("◂", color = p.primary, fontSize = 16.sp, modifier = Modifier.clickable {
+                scope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
+            })
+            Text("第 ${pagerState.currentPage + 1} 周", color = p.ink, fontSize = 14.sp,
+                modifier = Modifier.padding(horizontal = 12.dp))
+            Text("▸", color = p.primary, fontSize = 16.sp, modifier = Modifier.clickable {
+                scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
+            })
+        }
+        Text("◂ 左右滑动切换周次 ▸", fontSize = 9.sp, color = p.mutedSoft,
+            modifier = Modifier.align(Alignment.CenterHorizontally).padding(bottom = 4.dp))
+
+        HorizontalPager(state = pagerState) { page ->
+            // page index p → week = p + 1
+            WeeklyGrid(state = state, week = page + 1)
+        }
+    }
+}
+
+@Composable
+private fun WeeklyGrid(state: ScheduleUiState, week: Int) {
+    val p = LocalAppPalette.current
     val rowHeight = 48
+    // 本周日期 = weekDates(startDate, week - 1) —— 绝对周号，不是相对偏移
+    val weekDates = state.semester?.let { WeekCalculator.weekDates(it.startDate, week - 1) }
 
-    Column(Modifier.fillMaxSize().padding(horizontal = 10.dp)) {
-        Text("第 ${state.currentWeek} 周 · ${state.semester?.name ?: ""}",
-            fontSize = 14.sp, color = p.ink, modifier = Modifier.padding(vertical = 10.dp))
-
-        // 日期条：周一~周五（周几 + 月日）
-        val weekDates = state.semester?.let { WeekCalculator.weekDates(it.startDate, 0) }
+    Column(Modifier.fillMaxSize().padding(horizontal = 10.dp).verticalScroll(rememberScrollState())) {
+        // 日期条（周几 + 月日）
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-            weekdays.forEachIndexed { day, label ->
-                val date = weekDates?.get(day)
+            weekdays.forEachIndexed { index, label ->
+                val date = weekDates?.get(index)
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(label, fontSize = 12.sp, color = p.muted)
                     Text(date?.format(dateFormatter) ?: "", fontSize = 9.sp, color = p.mutedSoft)
                 }
             }
         }
-
-        // 周课表网格：时间槽 + 5 列
-        Row(Modifier.fillMaxWidth().weight(1f).padding(top = 6.dp).verticalScroll(rememberScrollState())) {
+        Row(Modifier.fillMaxWidth().padding(top = 6.dp)) {
             Column(Modifier.width(30.dp)) {
-                timetable?.periods?.forEach { period ->
+                state.timetable?.periods?.forEach { period ->
                     Text(period.startLabel(), fontSize = 8.sp, color = p.mutedSoft,
                         modifier = Modifier.height(rowHeight.dp))
                 }
@@ -64,10 +97,10 @@ fun ScheduleScreen(vm: ScheduleViewModel = hiltViewModel()) {
             weekdays.forEachIndexed { index, _ ->
                 val day = index + 1
                 Column(Modifier.weight(1f)) {
-                    val dayCourses = WeekCalculator.coursesForWeek(state.courses.filter { it.dayOfWeek == day }, state.currentWeek)
+                    val dayCourses = WeekCalculator.coursesForWeek(state.courses.filter { it.dayOfWeek == day }, week)
                     Box {
                         Column {
-                            timetable?.periods?.forEach { _ ->
+                            state.timetable?.periods?.forEach { _ ->
                                 Box(Modifier.height(rowHeight.dp).fillMaxWidth().padding(vertical = 1.dp)
                                     .background(p.surfaceSoft, RoundedCornerShape(if (p.isDark) 2.dp else 8.dp)))
                             }

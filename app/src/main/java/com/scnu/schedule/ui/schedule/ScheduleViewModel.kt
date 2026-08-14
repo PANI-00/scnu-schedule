@@ -21,6 +21,7 @@ data class ScheduleUiState(
     val timetable: TimeTable? = null,
     val semester: Semester? = null,
     val currentWeek: Int = 1,
+    val initialWeek: Int = 1,
 )
 
 @HiltViewModel
@@ -37,6 +38,6 @@ class ScheduleViewModel @Inject constructor(
     ) { courses, tts, semester, activeId ->
         val active = tts.firstOrNull { it.id == activeId } ?: tts.firstOrNull()
         val week = if (semester != null) WeekCalculator.currentWeek(semester.startDate) else 1
-        ScheduleUiState(courses, active, semester, week)
+        ScheduleUiState(courses, active, semester, week, week)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ScheduleUiState())
 }
