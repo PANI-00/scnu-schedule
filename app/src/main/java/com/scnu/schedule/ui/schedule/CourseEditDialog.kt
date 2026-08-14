@@ -51,7 +51,7 @@ fun CourseEditDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = p.surfaceCard,
-        title = { Text(if (initial == null) "新建课程" else "编辑课程", color = p.ink) },
+        title = { Text(if (initial == null || initial.id == 0L) "新建课程" else "编辑课程", color = p.ink) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(name, { name = it }, label = { Text("课程名") }, singleLine = true)
@@ -110,12 +110,13 @@ fun CourseEditDialog(
         confirmButton = {
             Button(onClick = {
                 onSave(Course(initial?.id ?: 0, name.ifBlank { "未命名" }, teacher, location, day, start, end,
-                    WeekPattern(kind, 1, 16), initial?.colorIndex ?: (day + start) % 8))
+                    WeekPattern(kind, 1, 16),
+                    if (initial == null || initial.id == 0L) (day + start) % 8 else initial.colorIndex))
                 onDismiss()
             }) { Text("保存") }
         },
         dismissButton = {
-            if (initial != null && onDelete != null) {
+            if (initial != null && initial.id != 0L && onDelete != null) {
                 TextButton({ onDelete(initial.id); onDismiss() }) { Text("删除") }
             } else TextButton(onDismiss) { Text("取消") }
         },
