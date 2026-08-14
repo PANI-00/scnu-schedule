@@ -46,7 +46,7 @@ interface TimeTableDao {
     @Query("DELETE FROM timetables WHERE id = :id")
     suspend fun deleteTimetable(id: Long)
 
-    @androidx.room.Transaction
+    @Transaction
     suspend fun replacePeriods(timetableId: Long, periods: List<PeriodEntity>) {
         deletePeriods(timetableId)
         upsertPeriods(periods)

@@ -16,7 +16,7 @@ class TimeTableRepositoryImpl @Inject constructor(private val dao: TimeTableDao)
     override val timetables: Flow<List<TimeTable>> = dao.observeAll().map { rows ->
         rows.map { row ->
             TimeTable(row.timetable.id, row.timetable.name, row.timetable.isDefault,
-                row.periods.sortedBy { p -> p.periodIndex }.map { Period(row.timetable.id, it.periodIndex, it.startMinute, it.endMinute) })
+                row.periods.sortedBy { p -> p.periodIndex }.map { Period(periodIndex = it.periodIndex, startMinute = it.startMinute, endMinute = it.endMinute) })
         }
     }
 
