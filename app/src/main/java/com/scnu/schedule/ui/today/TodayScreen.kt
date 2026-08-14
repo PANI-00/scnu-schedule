@@ -2,6 +2,8 @@ package com.scnu.schedule.ui.today
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,7 +28,7 @@ private val dateFmt = DateTimeFormatter.ofPattern("M月d日 EEEE")
 fun TodayScreen(vm: TodayViewModel = hiltViewModel()) {
     val state by vm.uiState.collectAsState()
     val p = LocalAppPalette.current
-    Column(Modifier.fillMaxSize().padding(16.dp)) {
+    Column(Modifier.fillMaxSize().padding(16.dp).verticalScroll(rememberScrollState())) {
         Text(state.today.format(dateFmt), fontSize = 18.sp, color = p.ink, fontWeight = FontWeight.Bold)
         Text("第 ${state.currentWeek} 周", fontSize = 12.sp, color = p.muted)
 
