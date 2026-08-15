@@ -20,9 +20,10 @@ class TimeTableRepositoryImpl @Inject constructor(private val dao: TimeTableDao)
         }
     }
 
-    override suspend fun upsert(timetable: TimeTable) {
+    override suspend fun upsert(timetable: TimeTable): Long {
         val ttId = dao.upsertTimetable(TimeTableEntity(timetable.id, timetable.name, timetable.isDefault))
         dao.replacePeriods(ttId, timetable.periods.map { PeriodEntity(0, ttId, it.periodIndex, it.startMinute, it.endMinute) })
+        return ttId
     }
 
     override suspend fun delete(id: Long) { dao.deletePeriods(id); dao.deleteTimetable(id) }

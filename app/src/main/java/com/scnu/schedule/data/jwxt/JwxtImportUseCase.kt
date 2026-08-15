@@ -42,7 +42,7 @@ class JwxtImportUseCase @Inject constructor(
         val timetables = timeTableRepo.timetables.first()
         timetables.firstOrNull { it.isDefault }?.let { return it.id }
         timetables.firstOrNull()?.let { return it.id }
-        // 防御：无作息表时种入石牌默认（正常启动已种子化，理论不触发）
+        // 防御：无作息表时种入石牌默认（正常启动已种子化，理论不触发），upsert 直接返回新 id
         val tt = TimeTable(
             name = "石牌校区",
             isDefault = true,
@@ -50,10 +50,7 @@ class JwxtImportUseCase @Inject constructor(
                 Period(periodIndex = idx, startMinute = start, endMinute = end)
             },
         )
-        timeTableRepo.upsert(tt)
-        return timeTableRepo.timetables.first()
-            .firstOrNull { it.name == "石牌校区" }?.id
-            ?: throw JwxtException("作息表创建失败")
+        return timeTableRepo.upsert(tt)
     }
 
     companion object {

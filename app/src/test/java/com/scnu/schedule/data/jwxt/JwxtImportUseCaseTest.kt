@@ -33,13 +33,14 @@ class JwxtImportUseCaseTest {
         }
     }
 
-    private class FakeTtRepo : TimeTableRepository {
-        val state = MutableStateFlow<List<TimeTable>>(
-            listOf(TimeTable(id = 1, name = "石牌校区", isDefault = true)),
-        )
+    private class FakeTtRepo(initial: List<TimeTable> = listOf(TimeTable(id = 1, name = "石牌校区", isDefault = true))) : TimeTableRepository {
+        val state = MutableStateFlow<List<TimeTable>>(initial)
         override val timetables: Flow<List<TimeTable>> = state
-        override suspend fun upsert(timetable: TimeTable) {
-            state.value = state.value.filter { it.id != timetable.id } + timetable
+        override suspend fun upsert(timetable: TimeTable): Long {
+            val id = if (timetable.id != 0L) timetable.id
+            else (state.value.maxOfOrNull { it.id } ?: 0L) + 1
+            state.value = state.value.filter { it.id != id } + timetable.copy(id = id)
+            return id
         }
 
         override suspend fun delete(id: Long) {
@@ -91,5 +92,25 @@ class JwxtImportUseCaseTest {
 
         assertEquals(LocalDate.of(2026, 8, 31), settingsRepo.state.value.startDate)
         assertEquals("2026-2027 第一学期（秋）", settingsRepo.state.value.name)
+    }
+
+    @Test
+    fun `无作息表时种入石牌默认并激活`() = runBlocking {
+        val courseRepo = FakeCourseRepo()
+        val ttRepo = FakeTtRepo(emptyList())
+        val settingsRepo = FakeSettingsRepo()
+        val useCase = JwxtImportUseCase(courseRepo, ttRepo, settingsRepo)
+
+        useCase.import(
+            courses = listOf(
+                Course(name = "高数", dayOfWeek = 1, startPeriod = 1, endPeriod = 2, weekPattern = WeekPattern(WeekKind.ALL, 1, 16)),
+            ),
+            semesterName = "2026-2027 第一学期（秋）",
+        )
+
+        assertEquals(1, ttRepo.state.value.size)
+        assertEquals("石牌校区", ttRepo.state.value[0].name)
+        assertEquals(10, ttRepo.state.value[0].periods.size)
+        assertEquals(ttRepo.state.value[0].id, settingsRepo.activeId.value)
     }
 }
