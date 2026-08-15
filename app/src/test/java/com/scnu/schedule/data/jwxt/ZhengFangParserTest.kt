@@ -118,4 +118,49 @@ class ZhengFangParserTest {
         assertEquals(5, c2.startPeriod)
         assertEquals(6, c2.endPeriod)
     }
+
+    @Test
+    fun `坏行缺少课程名称被跳过并警告`() {
+        val result = parser.parse("""{"kbList":[{"xqj":"1","jcs":"1","zs":"1-16周"}]}""")
+        assertTrue(result.courses.isEmpty())
+        assertEquals(1, result.warnings.size)
+        assertEquals("第 1 行", result.warnings[0].courseName)
+        assertTrue(result.warnings[0].message.contains("kcmc"))
+    }
+
+    @Test
+    fun `坏行节次无法解析被跳过并警告`() {
+        val result = parser.parse("""{"kbList":[{"kcmc":"X","xqj":"1","jcs":"abc","zs":"1-16周"}]}""")
+        assertTrue(result.courses.isEmpty())
+        assertEquals(1, result.warnings.size)
+        assertEquals("X", result.warnings[0].courseName)
+        assertTrue(result.warnings[0].message.contains("节次"))
+    }
+
+    @Test
+    fun `坏行周次为空被跳过并警告`() {
+        val result = parser.parse("""{"kbList":[{"kcmc":"X","xqj":"1","jcs":"1","zs":""}]}""")
+        assertTrue(result.courses.isEmpty())
+        assertEquals(1, result.warnings.size)
+        assertEquals("X", result.warnings[0].courseName)
+        assertTrue(result.warnings[0].message.contains("周次"))
+    }
+
+    @Test
+    fun `坏行周次无法解析被跳过并警告`() {
+        val result = parser.parse("""{"kbList":[{"kcmc":"X","xqj":"1","jcs":"1","zs":"abc"}]}""")
+        assertTrue(result.courses.isEmpty())
+        assertEquals(1, result.warnings.size)
+        assertEquals("X", result.warnings[0].courseName)
+        assertTrue(result.warnings[0].message.contains("周次"))
+    }
+
+    @Test
+    fun `响应缺少 kbList 字段返回空结果加警告`() {
+        val result = parser.parse("""{"foo":1}""")
+        assertTrue(result.courses.isEmpty())
+        assertEquals(1, result.warnings.size)
+        assertEquals("", result.warnings[0].courseName)
+        assertTrue(result.warnings[0].message.contains("kbList"))
+    }
 }
