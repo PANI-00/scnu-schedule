@@ -51,7 +51,7 @@ fun TodayContent(model: TodayWidgetModel, palette: AppPalette) {
     Column(
         GlanceModifier.fillMaxSize()
             .background(ColorProvider(palette.canvas))
-            .padding(10.dp),
+            .padding(8.dp),
     ) {
         Text(
             "今日 · ${model.dateLabel}",
@@ -65,24 +65,18 @@ fun TodayContent(model: TodayWidgetModel, palette: AppPalette) {
             )
         } else {
             model.entries.take(4).forEach { e ->
-                Row(GlanceModifier.fillMaxWidth().padding(top = 6.dp)) {
+                Row(GlanceModifier.fillMaxWidth().padding(top = 3.dp)) {
                     Text(
                         WidgetFormatter.hhmm(e.startMinute),
                         style = TextStyle(color = ColorProvider(palette.primary), fontSize = 11.sp, fontWeight = FontWeight.Bold),
                         modifier = GlanceModifier.width(36.dp),
                     )
-                    Column(GlanceModifier.fillMaxWidth()) {
-                        Text(
-                            e.name,
-                            maxLines = 1,
-                            style = TextStyle(color = ColorProvider(palette.ink), fontSize = 12.sp),
-                        )
-                        Text(
-                            e.location,
-                            maxLines = 1,
-                            style = TextStyle(color = ColorProvider(palette.muted), fontSize = 10.sp),
-                        )
-                    }
+                    Text(
+                        "${e.name} · ${e.location}",
+                        maxLines = 1,
+                        style = TextStyle(color = ColorProvider(palette.ink), fontSize = 12.sp),
+                        modifier = GlanceModifier.fillMaxWidth(),
+                    )
                 }
             }
         }
