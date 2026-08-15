@@ -836,7 +836,7 @@ git add -A && git commit -m "feat(jwxt): ZhengFangClient 复用 WebView 会话�
 - Create: `app/src/main/java/com/scnu/schedule/data/jwxt/JwxtSemesterResolver.kt`
 - Create: `app/src/test/java/com/scnu/schedule/data/jwxt/JwxtSemesterResolverTest.kt`
 
-- [ ] **Step 1: 写登录检测** `data/jwxt/JwxtLoginDetector.kt`
+- [x] **Step 1: 写登录检测** `data/jwxt/JwxtLoginDetector.kt`
 
 ```kotlin
 package com.scnu.schedule.data.jwxt
@@ -870,7 +870,7 @@ object JwxtLoginDetector {
 }
 ```
 
-- [ ] **Step 2: 写测试** `JwxtLoginDetectorTest.kt`
+- [x] **Step 2: 写测试** `JwxtLoginDetectorTest.kt`
 
 ```kotlin
 package com.scnu.schedule.data.jwxt
@@ -918,7 +918,7 @@ class JwxtLoginDetectorTest {
 }
 ```
 
-- [ ] **Step 3: 写学期推算** `data/jwxt/JwxtSemesterResolver.kt`
+- [x] **Step 3: 写学期推算** `data/jwxt/JwxtSemesterResolver.kt`
 
 ```kotlin
 package com.scnu.schedule.data.jwxt
@@ -958,7 +958,7 @@ object JwxtSemesterResolver {
 }
 ```
 
-- [ ] **Step 4: 写测试** `JwxtSemesterResolverTest.kt`
+- [x] **Step 4: 写测试** `JwxtSemesterResolverTest.kt`
 
 ```kotlin
 package com.scnu.schedule.data.jwxt
@@ -987,7 +987,7 @@ class JwxtSemesterResolverTest {
 }
 ```
 
-- [ ] **Step 5: 运行验证**
+- [x] **Step 5: 运行验证**
 
 Run:
 ```bash
@@ -996,7 +996,7 @@ gradle :app:testDebugUnitTest --tests "com.scnu.schedule.data.jwxt.JwxtSemesterR
 ```
 Expected: 4 + 2 个测试 PASS。
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add -A && git commit -m "feat(jwxt): 登录态检测 + 教务学期推算纯逻辑"
