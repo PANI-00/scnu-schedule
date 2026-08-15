@@ -1208,7 +1208,7 @@ git add -A && git commit -m "feat(jwxt): JwxtImportUseCase 导入落库（upsert
 - Create: `app/src/main/java/com/scnu/schedule/ui/jwxt/JwxtViewModel.kt`
 - Create: `app/src/main/java/com/scnu/schedule/data/di/JwxtModule.kt`
 
-- [ ] **Step 1: 写状态机** `ui/jwxt/JwxtUiState.kt`
+- [x] **Step 1: 写状态机** `ui/jwxt/JwxtUiState.kt`
 
 ```kotlin
 package com.scnu.schedule.ui.jwxt
@@ -1235,7 +1235,7 @@ enum class JwxtErrorKind {
 }
 ```
 
-- [ ] **Step 2: 写 ViewModel** `ui/jwxt/JwxtViewModel.kt`
+- [x] **Step 2: 写 ViewModel** `ui/jwxt/JwxtViewModel.kt`
 
 ```kotlin
 package com.scnu.schedule.ui.jwxt
@@ -1345,7 +1345,7 @@ class JwxtViewModel @Inject constructor(
 }
 ```
 
-- [ ] **Step 3: 写 DI 模块** `data/di/JwxtModule.kt`
+- [x] **Step 3: 写 DI 模块** `data/di/JwxtModule.kt`
 
 ```kotlin
 package com.scnu.schedule.data.di
@@ -1403,12 +1403,12 @@ abstract class JwxtModule {
 }
 ```
 
-- [ ] **Step 4: 编译验证**
+- [x] **Step 4: 编译验证**
 
 Run: `gradle :app:assembleDebug`
 Expected: `BUILD SUCCESSFUL`（若提示仓储接口重复绑定，按 Step 3 注释删对应 `@Binds`）。
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add -A && git commit -m "feat(jwxt): 导入状态机 ViewModel + 错误分类 + Hilt 接线"
