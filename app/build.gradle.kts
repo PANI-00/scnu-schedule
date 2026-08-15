@@ -53,6 +53,8 @@ dependencies {
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.okhttp)
+    implementation(libs.jsoup)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
@@ -60,5 +62,7 @@ dependencies {
     testImplementation(libs.androidx.junit)
     testImplementation(libs.androidx.espresso.core)
     testImplementation("org.robolectric:robolectric:4.13")
+    testImplementation(libs.okhttp.mockwebserver)
+    testImplementation(libs.json)
     debugImplementation(libs.androidx.ui.tooling)
 }

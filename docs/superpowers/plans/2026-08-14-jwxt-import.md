@@ -578,14 +578,14 @@ git add -A && git commit -m "feat(jwxt): ZhengFangParser 解析正方 kbList + �
 - Create: `app/src/test/java/com/scnu/schedule/data/jwxt/InMemoryCookieJar.kt`
 - Create: `app/src/test/java/com/scnu/schedule/data/jwxt/ZhengFangClientTest.kt`
 
-- [ ] **Step 1: Manifest 加 INTERNET 权限** `app/src/main/AndroidManifest.xml`
+- [x] **Step 1: Manifest 加 INTERNET 权限** `app/src/main/AndroidManifest.xml`
 
 在 `<manifest>` 根下、`<application>` 之前加：
 ```xml
     <uses-permission android:name="android.permission.INTERNET" />
 ```
 
-- [ ] **Step 2: 写 Cookie 桥** `data/jwxt/WebViewCookieJar.kt`
+- [x] **Step 2: 写 Cookie 桥** `data/jwxt/WebViewCookieJar.kt`
 
 ```kotlin
 package com.scnu.schedule.data.jwxt
@@ -631,7 +631,7 @@ class WebViewCookieJar : CookieJar {
 }
 ```
 
-- [ ] **Step 3: 写客户端** `data/jwxt/ZhengFangClient.kt`
+- [x] **Step 3: 写客户端** `data/jwxt/ZhengFangClient.kt`
 
 ```kotlin
 package com.scnu.schedule.data.jwxt
@@ -725,7 +725,7 @@ class ZhengFangClient(
 }
 ```
 
-- [ ] **Step 4: 写测试辅助** `data/jwxt/InMemoryCookieJar.kt`（test source）
+- [x] **Step 4: 写测试辅助** `data/jwxt/InMemoryCookieJar.kt`（test source）
 
 ```kotlin
 package com.scnu.schedule.data.jwxt
@@ -749,7 +749,7 @@ class InMemoryCookieJar : CookieJar {
 }
 ```
 
-- [ ] **Step 5: 写客户端测试** `data/jwxt/ZhengFangClientTest.kt`
+- [x] **Step 5: 写客户端测试** `data/jwxt/ZhengFangClientTest.kt`
 
 ```kotlin
 package com.scnu.schedule.data.jwxt
@@ -811,7 +811,7 @@ class ZhengFangClientTest {
 }
 ```
 
-- [ ] **Step 6: 运行验证**
+- [x] **Step 6: 运行验证**
 
 Run:
 ```bash
@@ -820,7 +820,7 @@ gradle :app:assembleDebug
 ```
 Expected: 2 个测试 PASS；`BUILD SUCCESSFUL`。
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add -A && git commit -m "feat(jwxt): ZhengFangClient 复用 WebView 会话抓 kbcx + MockWebServer 测试 + INTERNET 权限"
@@ -836,7 +836,7 @@ git add -A && git commit -m "feat(jwxt): ZhengFangClient 复用 WebView 会话�
 - Create: `app/src/main/java/com/scnu/schedule/data/jwxt/JwxtSemesterResolver.kt`
 - Create: `app/src/test/java/com/scnu/schedule/data/jwxt/JwxtSemesterResolverTest.kt`
 
-- [ ] **Step 1: 写登录检测** `data/jwxt/JwxtLoginDetector.kt`
+- [x] **Step 1: 写登录检测** `data/jwxt/JwxtLoginDetector.kt`
 
 ```kotlin
 package com.scnu.schedule.data.jwxt
@@ -870,7 +870,7 @@ object JwxtLoginDetector {
 }
 ```
 
-- [ ] **Step 2: 写测试** `JwxtLoginDetectorTest.kt`
+- [x] **Step 2: 写测试** `JwxtLoginDetectorTest.kt`
 
 ```kotlin
 package com.scnu.schedule.data.jwxt
@@ -918,7 +918,7 @@ class JwxtLoginDetectorTest {
 }
 ```
 
-- [ ] **Step 3: 写学期推算** `data/jwxt/JwxtSemesterResolver.kt`
+- [x] **Step 3: 写学期推算** `data/jwxt/JwxtSemesterResolver.kt`
 
 ```kotlin
 package com.scnu.schedule.data.jwxt
@@ -958,7 +958,7 @@ object JwxtSemesterResolver {
 }
 ```
 
-- [ ] **Step 4: 写测试** `JwxtSemesterResolverTest.kt`
+- [x] **Step 4: 写测试** `JwxtSemesterResolverTest.kt`
 
 ```kotlin
 package com.scnu.schedule.data.jwxt
@@ -987,7 +987,7 @@ class JwxtSemesterResolverTest {
 }
 ```
 
-- [ ] **Step 5: 运行验证**
+- [x] **Step 5: 运行验证**
 
 Run:
 ```bash
@@ -996,7 +996,7 @@ gradle :app:testDebugUnitTest --tests "com.scnu.schedule.data.jwxt.JwxtSemesterR
 ```
 Expected: 4 + 2 个测试 PASS。
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add -A && git commit -m "feat(jwxt): 登录态检测 + 教务学期推算纯逻辑"
@@ -1010,7 +1010,7 @@ git add -A && git commit -m "feat(jwxt): 登录态检测 + 教务学期推算纯
 - Create: `app/src/main/java/com/scnu/schedule/data/jwxt/JwxtImportUseCase.kt`
 - Create: `app/src/test/java/com/scnu/schedule/data/jwxt/JwxtImportUseCaseTest.kt`
 
-- [ ] **Step 1: 写用例** `data/jwxt/JwxtImportUseCase.kt`
+- [x] **Step 1: 写用例** `data/jwxt/JwxtImportUseCase.kt`
 
 ```kotlin
 package com.scnu.schedule.data.jwxt
@@ -1088,7 +1088,7 @@ class JwxtImportUseCase @Inject constructor(
 }
 ```
 
-- [ ] **Step 2: 写测试（假仓储）** `JwxtImportUseCaseTest.kt`
+- [x] **Step 2: 写测试（假仓储）** `JwxtImportUseCaseTest.kt`
 
 ```kotlin
 package com.scnu.schedule.data.jwxt
@@ -1188,12 +1188,12 @@ class JwxtImportUseCaseTest {
 }
 ```
 
-- [ ] **Step 3: 运行验证**
+- [x] **Step 3: 运行验证**
 
 Run: `gradle :app:testDebugUnitTest --tests "com.scnu.schedule.data.jwxt.JwxtImportUseCaseTest"`
 Expected: 2 个测试 PASS。
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add -A && git commit -m "feat(jwxt): JwxtImportUseCase 导入落库（upsert+激活石牌作息+学期名）"
@@ -1208,7 +1208,7 @@ git add -A && git commit -m "feat(jwxt): JwxtImportUseCase 导入落库（upsert
 - Create: `app/src/main/java/com/scnu/schedule/ui/jwxt/JwxtViewModel.kt`
 - Create: `app/src/main/java/com/scnu/schedule/data/di/JwxtModule.kt`
 
-- [ ] **Step 1: 写状态机** `ui/jwxt/JwxtUiState.kt`
+- [x] **Step 1: 写状态机** `ui/jwxt/JwxtUiState.kt`
 
 ```kotlin
 package com.scnu.schedule.ui.jwxt
@@ -1235,7 +1235,7 @@ enum class JwxtErrorKind {
 }
 ```
 
-- [ ] **Step 2: 写 ViewModel** `ui/jwxt/JwxtViewModel.kt`
+- [x] **Step 2: 写 ViewModel** `ui/jwxt/JwxtViewModel.kt`
 
 ```kotlin
 package com.scnu.schedule.ui.jwxt
@@ -1345,7 +1345,7 @@ class JwxtViewModel @Inject constructor(
 }
 ```
 
-- [ ] **Step 3: 写 DI 模块** `data/di/JwxtModule.kt`
+- [x] **Step 3: 写 DI 模块** `data/di/JwxtModule.kt`
 
 ```kotlin
 package com.scnu.schedule.data.di
@@ -1403,12 +1403,12 @@ abstract class JwxtModule {
 }
 ```
 
-- [ ] **Step 4: 编译验证**
+- [x] **Step 4: 编译验证**
 
 Run: `gradle :app:assembleDebug`
 Expected: `BUILD SUCCESSFUL`（若提示仓储接口重复绑定，按 Step 3 注释删对应 `@Binds`）。
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add -A && git commit -m "feat(jwxt): 导入状态机 ViewModel + 错误分类 + Hilt 接线"
@@ -1421,7 +1421,7 @@ git add -A && git commit -m "feat(jwxt): 导入状态机 ViewModel + 错误分�
 **Files:**
 - Create: `app/src/main/java/com/scnu/schedule/ui/jwxt/JwxtLoginScreen.kt`
 
-- [ ] **Step 1: 写登录页** `ui/jwxt/JwxtLoginScreen.kt`
+- [x] **Step 1: 写登录页** `ui/jwxt/JwxtLoginScreen.kt`
 
 ```kotlin
 package com.scnu.schedule.ui.jwxt
@@ -1704,14 +1704,14 @@ private fun ErrorPanel(kind: JwxtErrorKind, message: String, onRetry: () -> Unit
 }
 ```
 
-- [ ] **Step 2: 编译验证**
+- [x] **Step 2: 编译验证**
 
 Run: `gradle :app:assembleDebug`
 Expected: `BUILD SUCCESSFUL`。
 
 > 已知取舍 [DECISION]：旋转屏幕等配置变化会重建 WebView 并重新加载登录页（MVP 可接受）。如需保留登录态，可后续用 `rememberSaveable` + ViewModel 持有 URL。
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add -A && git commit -m "feat(jwxt): 教务导入 WebView 登录页 + 预览勾选 + 确认导入"
@@ -1725,7 +1725,7 @@ git add -A && git commit -m "feat(jwxt): 教务导入 WebView 登录页 + 预览
 - Modify: `app/src/main/java/com/scnu/schedule/ui/settings/SettingsScreen.kt`
 - Modify: `app/src/main/java/com/scnu/schedule/ui/navigation/ScheduleNavHost.kt`
 
-- [ ] **Step 1: 设置页加入口** `ui/settings/SettingsScreen.kt`
+- [x] **Step 1: 设置页加入口** `ui/settings/SettingsScreen.kt`
 
 函数签名加 `onJwxtImport` 回调：
 ```kotlin
@@ -1747,7 +1747,7 @@ fun SettingsScreen(
         )
 ```
 
-- [ ] **Step 2: 导航接线** `ui/navigation/ScheduleNavHost.kt`
+- [x] **Step 2: 导航接线** `ui/navigation/ScheduleNavHost.kt`
 
 import：
 ```kotlin
@@ -1770,7 +1770,7 @@ composable("jwxt_import") {
 }
 ```
 
-- [ ] **Step 3: 编译 + 全量测试**
+- [x] **Step 3: 编译 + 全量测试**
 
 Run:
 ```bash
@@ -1779,7 +1779,7 @@ gradle :app:testDebugUnitTest
 ```
 Expected: `BUILD SUCCESSFUL`；全部单测 PASS。
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add -A && git commit -m "feat(ui/settings): 教务导入入口 + jwxt_import 路由"

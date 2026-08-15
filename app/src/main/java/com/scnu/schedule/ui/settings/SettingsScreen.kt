@@ -24,6 +24,7 @@ import java.time.LocalDate
 @Composable
 fun SettingsScreen(
     onOpenTimeTable: () -> Unit = {},
+    onJwxtImport: () -> Unit = {},
     vm: SettingsViewModel = hiltViewModel(),
 ) {
     val theme by vm.theme.collectAsState(initial = AppThemeType.CLAUDE)
@@ -49,5 +50,13 @@ fun SettingsScreen(
 
         Text("作息时间", fontSize = 14.sp, color = p.muted, modifier = Modifier.padding(top = 20.dp))
         Text("管理节次时段 →", fontSize = 15.sp, color = p.primary, modifier = Modifier.clickable { onOpenTimeTable() })
+
+        Text("教务导入", fontSize = 14.sp, color = p.muted, modifier = Modifier.padding(top = 20.dp))
+        Text(
+            "从华师教务系统导入本学期课表 →",
+            fontSize = 15.sp,
+            color = p.primary,
+            modifier = Modifier.clickable(onClick = onJwxtImport),
+        )
     }
 }

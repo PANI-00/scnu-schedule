@@ -19,6 +19,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.scnu.schedule.ui.jwxt.JwxtLoginScreen
 import com.scnu.schedule.ui.schedule.ScheduleScreen
 import com.scnu.schedule.ui.settings.SettingsScreen
 import com.scnu.schedule.ui.settings.TimeTableScreen
@@ -60,7 +61,23 @@ fun ScheduleNavHost() {
             composable("today") { TodayScreen() }
             composable("schedule") { ScheduleScreen() }
             composable("timetable") { TimeTableScreen() }
-            composable("settings") { SettingsScreen(onOpenTimeTable = { nav.navigate("timetable") }) }
+            composable("settings") {
+                SettingsScreen(
+                    onOpenTimeTable = { nav.navigate("timetable") },
+                    onJwxtImport = { nav.navigate("jwxt_import") },
+                )
+            }
+            composable("jwxt_import") {
+                JwxtLoginScreen(
+                    onBack = { nav.popBackStack() },
+                    onImported = {
+                        nav.navigate("schedule") {
+                            popUpTo(nav.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                        }
+                    },
+                )
+            }
         }
     }
 }
