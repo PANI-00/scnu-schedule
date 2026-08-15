@@ -1421,7 +1421,7 @@ git add -A && git commit -m "feat(jwxt): 导入状态机 ViewModel + 错误分�
 **Files:**
 - Create: `app/src/main/java/com/scnu/schedule/ui/jwxt/JwxtLoginScreen.kt`
 
-- [ ] **Step 1: 写登录页** `ui/jwxt/JwxtLoginScreen.kt`
+- [x] **Step 1: 写登录页** `ui/jwxt/JwxtLoginScreen.kt`
 
 ```kotlin
 package com.scnu.schedule.ui.jwxt
@@ -1704,14 +1704,14 @@ private fun ErrorPanel(kind: JwxtErrorKind, message: String, onRetry: () -> Unit
 }
 ```
 
-- [ ] **Step 2: 编译验证**
+- [x] **Step 2: 编译验证**
 
 Run: `gradle :app:assembleDebug`
 Expected: `BUILD SUCCESSFUL`。
 
 > 已知取舍 [DECISION]：旋转屏幕等配置变化会重建 WebView 并重新加载登录页（MVP 可接受）。如需保留登录态，可后续用 `rememberSaveable` + ViewModel 持有 URL。
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add -A && git commit -m "feat(jwxt): 教务导入 WebView 登录页 + 预览勾选 + 确认导入"
@@ -1725,7 +1725,7 @@ git add -A && git commit -m "feat(jwxt): 教务导入 WebView 登录页 + 预览
 - Modify: `app/src/main/java/com/scnu/schedule/ui/settings/SettingsScreen.kt`
 - Modify: `app/src/main/java/com/scnu/schedule/ui/navigation/ScheduleNavHost.kt`
 
-- [ ] **Step 1: 设置页加入口** `ui/settings/SettingsScreen.kt`
+- [x] **Step 1: 设置页加入口** `ui/settings/SettingsScreen.kt`
 
 函数签名加 `onJwxtImport` 回调：
 ```kotlin
@@ -1747,7 +1747,7 @@ fun SettingsScreen(
         )
 ```
 
-- [ ] **Step 2: 导航接线** `ui/navigation/ScheduleNavHost.kt`
+- [x] **Step 2: 导航接线** `ui/navigation/ScheduleNavHost.kt`
 
 import：
 ```kotlin
@@ -1770,7 +1770,7 @@ composable("jwxt_import") {
 }
 ```
 
-- [ ] **Step 3: 编译 + 全量测试**
+- [x] **Step 3: 编译 + 全量测试**
 
 Run:
 ```bash
@@ -1779,7 +1779,7 @@ gradle :app:testDebugUnitTest
 ```
 Expected: `BUILD SUCCESSFUL`；全部单测 PASS。
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add -A && git commit -m "feat(ui/settings): 教务导入入口 + jwxt_import 路由"
