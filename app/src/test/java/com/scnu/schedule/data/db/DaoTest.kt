@@ -1,5 +1,6 @@
 package com.scnu.schedule.data.db
 
+import android.app.Application
 import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
@@ -14,9 +15,19 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import java.time.LocalDate
 
+/**
+ * Robolectric 用 Application：跳过 ScheduleApp.onCreate 里 Dispatchers.IO 上的
+ * ensureDefaultSeeded() 后台协程。该协程不受 runTest 控制，会跨测试存活，
+ * 在下一个测试的 runTest 启动时因 SQLite 连接指针失效抛
+ * IllegalStateException，被捕获为 UncaughtExceptionsBeforeTest 导致偶发失败。
+ */
+class NoSeedApp : Application()
+
 @RunWith(RobolectricTestRunner::class)
+@Config(application = NoSeedApp::class)
 class DaoTest {
     private lateinit var db: ScheduleDatabase
 
