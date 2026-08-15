@@ -101,7 +101,7 @@ D:\dingding\schedule\
 - Create: `app/src/test/java/com/scnu/schedule/data/jwxt/ZhengFangParserTest.kt`
 - Create: `app/src/main/java/com/scnu/schedule/data/jwxt/ZhengFangParser.kt`
 
-- [ ] **Step 1: 版本目录加依赖** `gradle/libs.versions.toml`
+- [x] **Step 1: 版本目录加依赖** `gradle/libs.versions.toml`
 
 在 `[versions]` 追加：
 ```toml
@@ -118,7 +118,7 @@ jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
 json = { group = "org.json", name = "json", version.ref = "json" }
 ```
 
-- [ ] **Step 2: app 依赖** `app/build.gradle.kts` — 在 dependencies 追加
+- [x] **Step 2: app 依赖** `app/build.gradle.kts` — 在 dependencies 追加
 
 ```kotlin
 implementation(libs.okhttp)
@@ -130,7 +130,7 @@ testImplementation(libs.json)
 
 > 注意：JVM 单测里若不引入 `org.json:json`，`JSONObject` 会命中 android.jar 桩的 "Method not mocked" 异常，解析器单测必挂。
 
-- [ ] **Step 3: 写 fixture** `app/src/test/resources/jwxt/kbList_sample.json`
+- [x] **Step 3: 写 fixture** `app/src/test/resources/jwxt/kbList_sample.json`
 
 覆盖：连续周 / 单周 / 双周 / 逗号自定义周 / 分段区间周 / 单节次 / 教师字段变体（teaxms|jsxm|xm）/ 地点变体（cdmc|ddxx）/ 星期变体（数字|中文）/ 缺字段行（应产生 warning）。
 
@@ -195,7 +195,7 @@ testImplementation(libs.json)
 }
 ```
 
-- [ ] **Step 4: 写领域类型** `domain/import/ImportResult.kt`
+- [x] **Step 4: 写领域类型** `domain/import/ImportResult.kt`
 
 ```kotlin
 package com.scnu.schedule.domain.import
@@ -215,7 +215,7 @@ data class ImportResult(
 )
 ```
 
-- [ ] **Step 5: 写解析器接口** `domain/import/CourseParser.kt`
+- [x] **Step 5: 写解析器接口** `domain/import/CourseParser.kt`
 
 ```kotlin
 package com.scnu.schedule.domain.import
@@ -226,7 +226,7 @@ interface CourseParser {
 }
 ```
 
-- [ ] **Step 6: 写异常族** `data/jwxt/JwxtExceptions.kt`
+- [x] **Step 6: 写异常族** `data/jwxt/JwxtExceptions.kt`
 
 ```kotlin
 package com.scnu.schedule.data.jwxt
@@ -241,7 +241,7 @@ class JwxtNetworkException(message: String, cause: Throwable? = null) : JwxtExce
 class JwxtParseException(message: String, cause: Throwable? = null) : JwxtException(message, cause)
 ```
 
-- [ ] **Step 7: 写失败测试（RED）** `ZhengFangParserTest.kt` + `TestFixtures.kt`
+- [x] **Step 7: 写失败测试（RED）** `ZhengFangParserTest.kt` + `TestFixtures.kt`
 
 `TestFixtures.kt`：
 ```kotlin
@@ -384,12 +384,12 @@ class ZhengFangParserTest {
 }
 ```
 
-- [ ] **Step 8: 运行确认失败（RED）**
+- [x] **Step 8: 运行确认失败（RED）**
 
 Run: `gradle :app:testDebugUnitTest --tests "com.scnu.schedule.data.jwxt.ZhengFangParserTest"`
 Expected: 编译失败（`ZhengFangParser` 未定义）。
 
-- [ ] **Step 9: 写实现** `data/jwxt/ZhengFangParser.kt`
+- [x] **Step 9: 写实现** `data/jwxt/ZhengFangParser.kt`
 
 ```kotlin
 package com.scnu.schedule.data.jwxt
@@ -556,12 +556,12 @@ class ZhengFangParser @Inject constructor() : CourseParser {
 }
 ```
 
-- [ ] **Step 10: 运行确认通过（GREEN）**
+- [x] **Step 10: 运行确认通过（GREEN）**
 
 Run: `gradle :app:testDebugUnitTest --tests "com.scnu.schedule.data.jwxt.ZhengFangParserTest"`
 Expected: PASS（9 个测试全绿）。
 
-- [ ] **Step 11: Commit**
+- [x] **Step 11: Commit**
 
 ```bash
 git add -A && git commit -m "feat(jwxt): ZhengFangParser 解析正方 kbList + 领域 ImportResult/CourseParser + fixture 测试"
@@ -578,14 +578,14 @@ git add -A && git commit -m "feat(jwxt): ZhengFangParser 解析正方 kbList + �
 - Create: `app/src/test/java/com/scnu/schedule/data/jwxt/InMemoryCookieJar.kt`
 - Create: `app/src/test/java/com/scnu/schedule/data/jwxt/ZhengFangClientTest.kt`
 
-- [ ] **Step 1: Manifest 加 INTERNET 权限** `app/src/main/AndroidManifest.xml`
+- [x] **Step 1: Manifest 加 INTERNET 权限** `app/src/main/AndroidManifest.xml`
 
 在 `<manifest>` 根下、`<application>` 之前加：
 ```xml
     <uses-permission android:name="android.permission.INTERNET" />
 ```
 
-- [ ] **Step 2: 写 Cookie 桥** `data/jwxt/WebViewCookieJar.kt`
+- [x] **Step 2: 写 Cookie 桥** `data/jwxt/WebViewCookieJar.kt`
 
 ```kotlin
 package com.scnu.schedule.data.jwxt
@@ -631,7 +631,7 @@ class WebViewCookieJar : CookieJar {
 }
 ```
 
-- [ ] **Step 3: 写客户端** `data/jwxt/ZhengFangClient.kt`
+- [x] **Step 3: 写客户端** `data/jwxt/ZhengFangClient.kt`
 
 ```kotlin
 package com.scnu.schedule.data.jwxt
@@ -725,7 +725,7 @@ class ZhengFangClient(
 }
 ```
 
-- [ ] **Step 4: 写测试辅助** `data/jwxt/InMemoryCookieJar.kt`（test source）
+- [x] **Step 4: 写测试辅助** `data/jwxt/InMemoryCookieJar.kt`（test source）
 
 ```kotlin
 package com.scnu.schedule.data.jwxt
@@ -749,7 +749,7 @@ class InMemoryCookieJar : CookieJar {
 }
 ```
 
-- [ ] **Step 5: 写客户端测试** `data/jwxt/ZhengFangClientTest.kt`
+- [x] **Step 5: 写客户端测试** `data/jwxt/ZhengFangClientTest.kt`
 
 ```kotlin
 package com.scnu.schedule.data.jwxt
@@ -811,7 +811,7 @@ class ZhengFangClientTest {
 }
 ```
 
-- [ ] **Step 6: 运行验证**
+- [x] **Step 6: 运行验证**
 
 Run:
 ```bash
@@ -820,7 +820,7 @@ gradle :app:assembleDebug
 ```
 Expected: 2 个测试 PASS；`BUILD SUCCESSFUL`。
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add -A && git commit -m "feat(jwxt): ZhengFangClient 复用 WebView 会话抓 kbcx + MockWebServer 测试 + INTERNET 权限"
