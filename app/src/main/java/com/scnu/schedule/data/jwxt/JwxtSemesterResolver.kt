@@ -25,10 +25,12 @@ object JwxtSemesterResolver {
                 name = "${today.year - 1}-${today.year} 第二学期（春）",
             )
         } else {
+            // 8-12 月属本学年秋学期；1 月寒假期间仍在上一学年的秋学期里。
+            val autumnYear = if (m == 1) today.year - 1 else today.year
             SemesterSelection(
-                xnm = today.year.toString(),
+                xnm = autumnYear.toString(),
                 xqm = "3",
-                name = "${today.year}-${today.year + 1} 第一学期（秋）",
+                name = "$autumnYear-${autumnYear + 1} 第一学期（秋）",
             )
         }
     }

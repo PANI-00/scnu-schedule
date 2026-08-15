@@ -40,4 +40,34 @@ class JwxtLoginDetectorTest {
     fun `无 cookie 判定未登录`() {
         assertFalse(JwxtLoginDetector.isLoggedIn("https://jwxt.scnu.edu.cn/", null))
     }
+
+    @Test
+    fun `host 大小写不敏感仍判定已登录`() {
+        assertTrue(
+            JwxtLoginDetector.isLoggedIn(
+                "https://Jwxt.SCNU.edu.cn/xtgl/index_initMenu.html",
+                "JSESSIONID=ABC123",
+            ),
+        )
+    }
+
+    @Test
+    fun `恶意前缀域不匹配教务域`() {
+        assertFalse(
+            JwxtLoginDetector.isLoggedIn(
+                "https://eviljwxt.scnu.edu.cn/xtgl/index_initMenu.html",
+                "JSESSIONID=ABC123",
+            ),
+        )
+    }
+
+    @Test
+    fun `会话 cookie 值为空判定未登录`() {
+        assertFalse(
+            JwxtLoginDetector.isLoggedIn(
+                "https://jwxt.scnu.edu.cn/xtgl/index_initMenu.html",
+                "JSESSIONID=; route=xyz",
+            ),
+        )
+    }
 }

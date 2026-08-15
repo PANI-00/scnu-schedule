@@ -16,9 +16,13 @@ object JwxtLoginDetector {
     fun isLoggedIn(url: String?, cookieHeader: String?): Boolean {
         if (url.isNullOrBlank() || cookieHeader.isNullOrBlank()) return false
         val host = runCatching { URI(url).host }.getOrNull() ?: return false
-        if (!host.endsWith("jwxt.scnu.edu.cn")) return false
+        val h = host.lowercase()
+        if (h != "jwxt.scnu.edu.cn" && !h.endsWith(".jwxt.scnu.edu.cn")) return false
         if (isLoginPage(url)) return false
-        val names = cookieHeader.split(";").map { it.trim().substringBefore('=').uppercase() }
+        val names = cookieHeader.split(";")
+            .map { it.trim().let { piece -> piece.substringBefore('=') to piece.substringAfter('=') } }
+            .filter { it.second.isNotBlank() }
+            .map { it.first.uppercase() }
         return names.any { it in sessionCookieNames }
     }
 
