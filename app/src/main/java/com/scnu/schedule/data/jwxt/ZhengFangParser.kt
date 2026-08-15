@@ -1,8 +1,8 @@
 package com.scnu.schedule.data.jwxt
 
-import com.scnu.schedule.domain.import.CourseParser
-import com.scnu.schedule.domain.import.ImportResult
-import com.scnu.schedule.domain.import.ImportWarning
+import com.scnu.schedule.domain.importing.CourseParser
+import com.scnu.schedule.domain.importing.ImportResult
+import com.scnu.schedule.domain.importing.ImportWarning
 import com.scnu.schedule.domain.model.Course
 import com.scnu.schedule.domain.model.WeekKind
 import com.scnu.schedule.domain.model.WeekPattern

@@ -1,4 +1,4 @@
-package com.scnu.schedule.domain.import
+package com.scnu.schedule.domain.importing
 
 import com.scnu.schedule.domain.model.Course
 

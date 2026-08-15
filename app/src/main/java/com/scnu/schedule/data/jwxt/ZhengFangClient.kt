@@ -1,7 +1,7 @@
 package com.scnu.schedule.data.jwxt
 
-import com.scnu.schedule.domain.import.CourseParser
-import com.scnu.schedule.domain.import.ImportResult
+import com.scnu.schedule.domain.importing.CourseParser
+import com.scnu.schedule.domain.importing.ImportResult
 import java.io.IOException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
