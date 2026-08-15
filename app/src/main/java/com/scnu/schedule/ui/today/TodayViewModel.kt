@@ -35,7 +35,7 @@ class TodayViewModel @Inject constructor(
     ) { courses, tts, semester, activeId ->
         val active = tts.firstOrNull { it.id == activeId } ?: tts.firstOrNull()
         val today = LocalDate.now()
-        val week = if (semester != null) WeekCalculator.currentWeek(semester.startDate, today) else 1
+        val week = WeekCalculator.currentWeek(semester.startDate, today)
         val dayNum = today.dayOfWeek.value // 1=周一
         val todayCourses = WeekCalculator.coursesForWeek(courses.filter { it.dayOfWeek == dayNum }, week)
             .sortedBy { it.startPeriod }

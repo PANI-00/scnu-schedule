@@ -21,7 +21,6 @@ data class ScheduleUiState(
     val courses: List<Course> = emptyList(),
     val timetable: TimeTable? = null,
     val semester: Semester? = null,
-    val currentWeek: Int = 1,
     val initialWeek: Int = 1,
 )
 
@@ -38,8 +37,8 @@ class ScheduleViewModel @Inject constructor(
         settingsRepo.activeTimeTableId,
     ) { courses, tts, semester, activeId ->
         val active = tts.firstOrNull { it.id == activeId } ?: tts.firstOrNull()
-        val week = if (semester != null) WeekCalculator.currentWeek(semester.startDate) else 1
-        ScheduleUiState(courses, active, semester, week, week)
+        val week = WeekCalculator.currentWeek(semester.startDate)
+        ScheduleUiState(courses, active, semester, initialWeek = week)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ScheduleUiState())
 
     fun saveCourse(course: Course) = viewModelScope.launch { courseRepo.upsert(course) }
