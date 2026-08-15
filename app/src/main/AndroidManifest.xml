@@ -51,5 +51,13 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/week_widget" />
         </receiver>
+
+        <receiver
+            android:name=".ui.widget.WidgetRefreshReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.scnu.schedule.action.WIDGET_REFRESH" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>
