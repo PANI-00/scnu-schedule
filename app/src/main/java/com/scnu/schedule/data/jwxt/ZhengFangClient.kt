@@ -33,7 +33,14 @@ class ZhengFangClient(
         .followRedirects(true)
         .build()
 
-    /** 抓取并解析指定学年/学期的课表。 */
+    /**
+     * 抓取并解析指定学年/学期的课表。
+     *
+     * 登录过期通过 HTTP 401/403 判定（会话 cookie 被拒时返回）；
+     * 客户端 followRedirects(true)，302 会被 OkHttp 自动跟随，若最终跳转到登录页，
+     * 会因返回非 JSON 而表现为 [JwxtParseException]。
+     * [VERIFY] 真实过期行为待真机核对。
+     */
     suspend fun fetchSchedule(xnm: String, xqm: String): ImportResult =
         withContext(Dispatchers.IO) {
             val csrf = fetchCsrfToken()
@@ -52,7 +59,7 @@ class ZhengFangClient(
             try {
                 client.newCall(request).execute().use { resp ->
                     when {
-                        resp.code == 302 || resp.code == 401 || resp.code == 403 ->
+                        resp.code == 401 || resp.code == 403 ->
                             throw JwxtLoginExpiredException("登录已失效（HTTP ${resp.code}），请重新登录")
                         !resp.isSuccessful ->
                             throw JwxtNetworkException("教务接口 HTTP ${resp.code}")
