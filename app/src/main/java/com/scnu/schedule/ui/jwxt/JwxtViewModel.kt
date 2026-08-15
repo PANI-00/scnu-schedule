@@ -72,6 +72,8 @@ class JwxtViewModel @Inject constructor(
                 )
             } catch (e: JwxtParseException) {
                 _uiState.value = JwxtUiState.Error(JwxtErrorKind.PARSE_FAILED, "课表解析失败：${e.message}")
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
             } catch (e: Exception) {
                 _uiState.value = JwxtUiState.Error(JwxtErrorKind.UNKNOWN, "未知错误：${e.message}")
             }
@@ -85,6 +87,8 @@ class JwxtViewModel @Inject constructor(
             try {
                 importUseCase.import(courses, semesterSelection.name)
                 _uiState.value = JwxtUiState.Success(courses.size)
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
             } catch (e: Exception) {
                 _uiState.value = JwxtUiState.Error(JwxtErrorKind.UNKNOWN, "保存失败：${e.message}")
             }
@@ -100,6 +104,7 @@ class JwxtViewModel @Inject constructor(
 
     private fun isBusy(): Boolean =
         _uiState.value is JwxtUiState.Fetching ||
+            _uiState.value is JwxtUiState.Preview ||
             _uiState.value is JwxtUiState.Importing ||
             _uiState.value is JwxtUiState.Success
 }
