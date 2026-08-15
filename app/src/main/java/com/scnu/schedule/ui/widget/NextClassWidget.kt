@@ -1,20 +1,77 @@
 package com.scnu.schedule.ui.widget
 
 import android.content.Context
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
+import androidx.glance.background
 import androidx.glance.layout.Box
+import androidx.glance.layout.Column
 import androidx.glance.layout.fillMaxSize
+import androidx.glance.layout.padding
+import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
+import androidx.glance.text.TextStyle
+import androidx.glance.unit.ColorProvider
+import com.scnu.schedule.ui.theme.AppPalette
+import com.scnu.schedule.ui.theme.AppThemeType
+import com.scnu.schedule.ui.theme.ClaudePalette
+import com.scnu.schedule.ui.theme.OpenCodePalette
+import java.time.LocalDateTime
 
-/** 下一节课 2×1。Task 1 冒烟：固定文本；Task 3 接入真实数据。 */
+/** 下一节课 2×1：课程名 + 地点 + 开始时间/倒计时；空态显示「暂无课程」。 */
 class NextClassWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        provideContent {
-            Box(GlanceModifier.fillMaxSize()) {
-                Text("下一节课")
+        val data = WidgetDataReader.load(context)
+        val palette = if (data?.theme == AppThemeType.CLAUDE) ClaudePalette else OpenCodePalette
+        val model = data?.let { d ->
+            WidgetFormatter.nextClass(
+                d.courses,
+                d.activeTimetable?.periods ?: emptyList(),
+                d.semester,
+                LocalDateTime.now(),
+            )
+        }
+        provideContent { NextClassContent(model, palette) }
+    }
+}
+
+@Composable
+fun NextClassContent(model: NextClassModel?, palette: AppPalette) {
+    Box(
+        GlanceModifier.fillMaxSize()
+            .background(ColorProvider(palette.canvas))
+            .padding(12.dp)
+            .cornerRadius(if (palette.isDark) 0.dp else 12.dp),
+    ) {
+        if (model == null) {
+            Text(
+                "暂无课程",
+                style = TextStyle(color = ColorProvider(palette.muted), fontSize = 13.sp),
+            )
+        } else {
+            Column(GlanceModifier.fillMaxSize()) {
+                Text(
+                    model.name,
+                    maxLines = 1,
+                    style = TextStyle(color = ColorProvider(palette.ink), fontSize = 20.sp, fontWeight = FontWeight.Bold),
+                )
+                Text(
+                    "${model.location} · ${WidgetFormatter.hhmm(model.startMinute)} 开始",
+                    maxLines = 1,
+                    style = TextStyle(color = ColorProvider(palette.muted), fontSize = 12.sp),
+                    modifier = GlanceModifier.padding(top = 4.dp),
+                )
+                Text(
+                    WidgetFormatter.countdownText(model.minutesUntil),
+                    style = TextStyle(color = ColorProvider(palette.primary), fontSize = 13.sp),
+                    modifier = GlanceModifier.padding(top = 4.dp),
+                )
             }
         }
     }

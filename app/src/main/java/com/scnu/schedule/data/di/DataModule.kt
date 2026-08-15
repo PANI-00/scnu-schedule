@@ -1,8 +1,8 @@
 package com.scnu.schedule.data.di
 
 import android.content.Context
-import androidx.room.Room
 import com.scnu.schedule.data.db.CourseDao
+import com.scnu.schedule.data.db.DbProvider
 import com.scnu.schedule.data.db.ScheduleDatabase
 import com.scnu.schedule.data.db.SemesterDao
 import com.scnu.schedule.data.db.TimeTableDao
@@ -25,7 +25,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object DataModule {
     @Provides @Singleton fun provideDb(@ApplicationContext ctx: Context): ScheduleDatabase =
-        Room.databaseBuilder(ctx, ScheduleDatabase::class.java, "schedule.db").build()
+        DbProvider.schedule(ctx)
 
     @Provides fun provideCourseDao(db: ScheduleDatabase): CourseDao = db.courseDao()
     @Provides fun provideTimeTableDao(db: ScheduleDatabase): TimeTableDao = db.timeTableDao()
