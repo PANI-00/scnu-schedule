@@ -1010,7 +1010,7 @@ git add -A && git commit -m "feat(jwxt): 登录态检测 + 教务学期推算纯
 - Create: `app/src/main/java/com/scnu/schedule/data/jwxt/JwxtImportUseCase.kt`
 - Create: `app/src/test/java/com/scnu/schedule/data/jwxt/JwxtImportUseCaseTest.kt`
 
-- [ ] **Step 1: 写用例** `data/jwxt/JwxtImportUseCase.kt`
+- [x] **Step 1: 写用例** `data/jwxt/JwxtImportUseCase.kt`
 
 ```kotlin
 package com.scnu.schedule.data.jwxt
@@ -1088,7 +1088,7 @@ class JwxtImportUseCase @Inject constructor(
 }
 ```
 
-- [ ] **Step 2: 写测试（假仓储）** `JwxtImportUseCaseTest.kt`
+- [x] **Step 2: 写测试（假仓储）** `JwxtImportUseCaseTest.kt`
 
 ```kotlin
 package com.scnu.schedule.data.jwxt
@@ -1188,12 +1188,12 @@ class JwxtImportUseCaseTest {
 }
 ```
 
-- [ ] **Step 3: 运行验证**
+- [x] **Step 3: 运行验证**
 
 Run: `gradle :app:testDebugUnitTest --tests "com.scnu.schedule.data.jwxt.JwxtImportUseCaseTest"`
 Expected: 2 个测试 PASS。
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add -A && git commit -m "feat(jwxt): JwxtImportUseCase 导入落库（upsert+激活石牌作息+学期名）"
