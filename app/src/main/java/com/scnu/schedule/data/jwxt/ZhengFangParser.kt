@@ -49,7 +49,12 @@ class ZhengFangParser @Inject constructor() : CourseParser {
 
         val day = parseDay(item.optString("xqj"), name, warnings)
         val (start, end) = parsePeriods(item.optString("jcs"), item.optString("jcjs"), name, warnings)
-        val week = parseWeeks(firstNonBlank(item, "zs", "zcs", "zcsm"), item.optString("zcjs"), name, warnings)
+        val week = parseWeeks(
+            firstNonBlank(item, "zcd", "zs", "zcs", "zcsm"),
+            item.optString("zcjs"),
+            name,
+            warnings,
+        )
 
         if (day == null || start == null || end == null || week == null) return null
         return Course(

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>scnu课程表 · 2×2 小组件方案预览</title>
+<style>
+  /* ============================================================
+     PROTOTYPE · 2×2 桌面小组件方案库（6 套）
+     选定后落地到 App：Glance 2×2 组件（新 Widget + Receiver + xml）
+     ============================================================ */
+
+  /* ---------- 三套主题 ---------- */
+  body[data-theme="cream"]{
+    --canvas:#FAF9F5; --card:#EFE9DE; --hair:#E6DFD8; --ink:#141413; --muted:#6C6A64; --mutedSoft:#8E8B82; --primary:#CC785C; --ok:#5DB872; --warn:#E8A55A; --bad:#C64545;
+    --wall1:#F2E4D8; --wall2:#E8DCCB;
+  }
+  body[data-theme="night"]{
+    --canvas:#201D1D; --card:#302C2C; --hair:#3A3A38; --ink:#FDFCFC; --muted:#9A9898; --mutedSoft:#646262; --primary:#30D158; --ok:#30D158; --warn:#FF9F0A; --bad:#FF3B30;
+    --wall1:#17161a; --wall2:#1f1e26;
+  }
+  body[data-theme="paper"]{
+    --canvas:#F0E8D6; --card:#FBF6EA; --hair:#D4C7A8; --ink:#262019; --muted:#83755C; --mutedSoft:#B0A488; --primary:#A8432F; --ok:#4E6B33; --warn:#C89A2C; --bad:#A63A2A;
+    --wall1:#E5D9BE; --wall2:#D8C9A8;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#E8E6E1;color:#26241f;padding:28px 20px 60px;transition:background .3s}
+  .proto-badge{display:inline-block;background:#26241f;color:#fff;font-size:11px;padding:3px 10px;border-radius:999px;letter-spacing:.5px}
+  h1{font-size:22px;margin:10px 0 4px}
+  .sub{font-size:13px;color:#6f6b63;margin-bottom:20px;line-height:1.6;max-width:980px}
+
+  /* 主题按钮 */
+  .tbtnrow{display:flex;gap:8px;margin-bottom:20px}
+  .tbtn{border:1px solid #bbb;background:#fff;color:#333;padding:7px 16px;border-radius:10px;cursor:pointer;font-size:13px}
+  .tbtn.active{background:#26241f;color:#fff;border-color:#26241f}
+
+  /* ---------- 2×2 组件通用 ---------- */
+  .w{
+    width:100%;height:100%;border-radius:18px;background:var(--card);
+    border:1px solid var(--hair);box-shadow:0 6px 18px rgba(0,0,0,.12);
+    padding:12px;display:flex;flex-direction:column;overflow:hidden;
+    color:var(--ink);font-family:inherit;position:relative;
+  }
+  .w-sub{font-size:9px;color:var(--muted);display:flex;justify-content:space-between}
+  .w-name{font-size:15px;font-weight:700;color:var(--ink);line-height:1.25;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .w-loc{font-size:10px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .w-time{font-size:10px;color:var(--primary);font-weight:600;margin-top:auto}
+  .w-head{font-size:10px;color:var(--muted);font-weight:600;display:flex;justify-content:space-between;align-items:baseline}
+  .w-item{display:flex;align-items:baseline;gap:6px;font-size:10px;margin-top:5px;min-width:0}
+  .w-item .wt{flex:0 0 auto;color:var(--primary);font-weight:700}
+  .w-item .wn{color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .w-status{font-size:11px;font-weight:800;color:var(--warn);letter-spacing:.5px;margin-top:auto}
+  .w-week{font-size:13px;color:var(--muted)}
+  .w-week b{font-size:26px;color:var(--primary);font-weight:800}
+  .w-today{font-size:11px;color:var(--ink);font-weight:600;margin-top:2px}
+  .w-next{font-size:10px;color:var(--muted);margin-top:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .w-clock{font-size:30px;font-weight:800;color:var(--ink);letter-spacing:-1px;line-height:1.1}
+  .w-clock small{font-size:12px;color:var(--muted);font-weight:600;margin-left:4px}
+  .w-bar{height:6px;border-radius:3px;background:var(--hair);margin-top:auto;overflow:hidden}
+  .w-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--primary),var(--warn));border-radius:3px}
+  .w-count{font-size:10px;color:var(--primary);font-weight:600;margin-top:4px}
+
+  /* ---------- 方案卡 ---------- */
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;max-width:1120px;margin:0 auto}
+  .stylecard{background:#fff;border:2px solid #ddd;border-radius:14px;padding:14px;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+  .stylecard.active{border-color:#26241f;box-shadow:0 6px 20px rgba(0,0,0,.12)}
+  .sc-head{display:flex;align-items:baseline;gap:8px}
+  .sc-name{font-size:14px;font-weight:700}
+  .sc-no{font-size:11px;color:#999;font-weight:600}
+  .sc-desc{font-size:12px;color:#8a867e;margin:3px 0 10px}
+  .wbox{aspect-ratio:1/1;margin:0 auto}
+
+  /* ---------- 桌面模拟 ---------- */
+  .stage{display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:34px}
+  .stage h2{font-size:17px}
+  .wbtnrow{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:860px}
+  .wbtn{border:1px solid #bbb;background:#fff;color:#333;padding:7px 14px;border-radius:10px;cursor:pointer;font-size:13px}
+  .wbtn.active{background:#26241f;color:#fff;border-color:#26241f}
+  .desktop{
+    width:760px;height:480px;border-radius:26px;position:relative;overflow:hidden;
+    background:linear-gradient(150deg,var(--wall1),var(--wall2));
+    box-shadow:0 24px 60px rgba(0,0,0,.3);border:8px solid #26221f;transition:background .3s;
+  }
+  .desk-status{position:absolute;top:10px;left:22px;color:#fff;font-size:13px;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,.4);z-index:2}
+  .desk-batt{position:absolute;top:10px;right:22px;color:#fff;font-size:12px;z-index:2;text-shadow:0 1px 3px rgba(0,0,0,.4)}
+  .desk-icons{position:absolute;top:44px;right:20px;display:grid;grid-template-columns:repeat(2,64px);gap:12px;z-index:1}
+  .desk-icons i{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9px;color:rgba(255,255,255,.9);text-shadow:0 1px 2px rgba(0,0,0,.5)}
+  .desk-icons i span{font-size:26px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
+  #deskW{position:absolute;top:48px;left:24px;width:200px;height:200px;z-index:2}
+  .desk-dock{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.18);backdrop-filter:blur(8px);border-radius:18px;padding:8px 14px;display:flex;gap:16px;z-index:2}
+  .desk-dock span{font-size:22px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))}
+  .note{max-width:860px;font-size:12px;color:#6f6b63;line-height:1.7;text-align:center;margin-top:14px}
+</style>
+</head>
+<body data-theme="cream">
+
+<span class="proto-badge">PROTOTYPE · 原型预览</span>
+<h1>2×2 桌面小组件 · 6 套方案</h1>
+<div class="sub">为「scnu课程表」新增的 2×2 桌面组件做的方案库。先切主题（奶油珊瑚 / 午夜机房 / 老报刊亭）再点方案卡，下方桌面模拟联动。
+2×2 空间有限，各方案聚焦不同信息：下一节课 / 今日简表 / 上课状态 / 周次概览 / 时钟 / 倒计时条。选定后落地为 Glance 小组件（需在桌面占用 2×2 格子）。</div>
+
+<div class="tbtnrow">
+  <button class="tbtn active" id="tb-cream" onclick="setTheme('cream')">奶油珊瑚</button>
+  <button class="tbtn" id="tb-night" onclick="setTheme('night')">午夜机房</button>
+  <button class="tbtn" id="tb-paper" onclick="setTheme('paper')">老报刊亭</button>
+</div>
+
+<!-- 方案卡 -->
+<div class="cards">
+  <div class="stylecard active" data-w="a" onclick="setWidget('a')">
+    <div class="sc-head"><span class="sc-name">方案A 下一节课</span><span class="sc-no">01</span></div>
+    <div class="sc-desc">课程名 + 地点 + 开始时间/倒计时 · 信息最聚焦</div>
+    <div class="wbox"><div class="w">
+      <div class="w-sub"><span>周一</span><span>第3周</span></div>
+      <div class="w-name">高等数学A（1）</div>
+      <div class="w-loc">一教101</div>
+      <div class="w-time">10:20 开始 · 39 分钟后</div>
+    </div></div>
+  </div>
+  <div class="stylecard" data-w="b" onclick="setWidget('b')">
+    <div class="sc-head"><span class="sc-name">方案B 今日简表</span><span class="sc-no">02</span></div>
+    <div class="sc-desc">今天全部课程列表（时间 + 名称），最多 3 条</div>
+    <div class="wbox"><div class="w">
+      <div class="w-head"><span>今日 3 节</span><span style="color:var(--primary)">周一</span></div>
+      <div class="w-item"><span class="wt">08:30</span><span class="wn">大学英语（二）</span></div>
+      <div class="w-item"><span class="wt">10:20</span><span class="wn">高等数学A（1）</span></div>
+      <div class="w-item"><span class="wt">14:30</span><span class="wn">线性代数</span></div>
+    </div></div>
+  </div>
+  <div class="stylecard" data-w="c" onclick="setWidget('c')">
+    <div class="sc-head"><span class="sc-name">方案C 上课状态</span><span class="sc-no">03</span></div>
+    <div class="sc-desc">即将上课 / 上课中 / 已下课 状态大字 + 课程信息</div>
+    <div class="wbox"><div class="w">
+      <div class="w-name">高等数学A（1）</div>
+      <div class="w-loc">一教101 · 10:20–11:50</div>
+      <div class="w-status">⏰ 即将上课</div>
+    </div></div>
+  </div>
+  <div class="stylecard" data-w="d" onclick="setWidget('d')">
+    <div class="sc-head"><span class="sc-name">方案D 周次概览</span><span class="sc-no">04</span></div>
+    <div class="sc-desc">第几周大字 + 今日节数 + 下一节课 · 信息密度高</div>
+    <div class="wbox"><div class="w">
+      <div class="w-week">第 <b>3</b> 周</div>
+      <div class="w-today">今日 3 节</div>
+      <div class="w-next">下一节：高等数学A 10:20</div>
+    </div></div>
+  </div>
+  <div class="stylecard" data-w="e" onclick="setWidget('e')">
+    <div class="sc-head"><span class="sc-name">方案E 时钟卡片</span><span class="sc-no">05</span></div>
+    <div class="sc-desc">当前时间大字 + 下一节课 · 看时间顺带看课</div>
+    <div class="wbox"><div class="w">
+      <div class="w-clock">09:41<small>周一</small></div>
+      <div class="w-next">下一节：高等数学A 10:20</div>
+      <div class="w-loc">一教101</div>
+    </div></div>
+  </div>
+  <div class="stylecard" data-w="f" onclick="setWidget('f')">
+    <div class="sc-head"><span class="sc-name">方案F 倒计时条</span><span class="sc-no">06</span></div>
+    <div class="sc-desc">下一节课 + 距离上课进度条 + 剩余时间</div>
+    <div class="wbox"><div class="w">
+      <div class="w-name">高等数学A（1）</div>
+      <div class="w-loc">一教101</div>
+      <div class="w-bar"><i style="width:62%"></i></div>
+      <div class="w-count">39 分钟后开始</div>
+    </div></div>
+  </div>
+</div>
+
+<!-- 桌面模拟 -->
+<div class="stage">
+  <h2>桌面实景预览（2×2 格）</h2>
+  <div class="wbtnrow" id="wbtnrow"></div>
+  <div class="desktop">
+    <div class="desk-status">09:41</div>
+    <div class="desk-batt">🔋 87%</div>
+    <div class="desk-icons">
+      <i><span>📱</span>电话</i><i><span>💬</span>信息</i>
+      <i><span>📷</span>相机</i><i><span>🌐</span>浏览器</i>
+      <i><span>🗓️</span>日历</i><i><span>🎵</span>音乐</i>
+    </div>
+    <div id="deskW"></div>
+    <div class="desk-dock"><span>📞</span><span>✉️</span><span>🌍</span></div>
+  </div>
+  <div class="note">
+    浏览器打开即可预览。选定方案（A–F）和主题后告诉我，我落地为 Glance 2×2 小组件（新增 Widget/Receiver/xml 配置 + 数据刷新联动），并重新构筑 APK。
+  </div>
+</div>
+
+<script>
+  var WIDGETS = [
+    ['a','A 下一节课'],['b','B 今日简表'],['c','C 上课状态'],['d','D 周次概览'],['e','E 时钟卡片'],['f','F 倒计时条']
+  ];
+  var btnRow = document.getElementById('wbtnrow');
+  WIDGETS.forEach(function(w){
+    var b = document.createElement('button');
+    b.className = 'wbtn' + (w[0] === 'a' ? ' active' : '');
+    b.dataset.w = w[0];
+    b.textContent = w[1];
+    b.onclick = function(){ setWidget(w[0]); };
+    btnRow.appendChild(b);
+  });
+
+  function widgetHtml(w){
+    switch(w){
+      case 'a': return '<div class="w"><div class="w-sub"><span>周一</span><span>第3周</span></div><div class="w-name">高等数学A（1）</div><div class="w-loc">一教101</div><div class="w-time">10:20 开始 · 39 分钟后</div></div>';
+      case 'b': return '<div class="w"><div class="w-head"><span>今日 3 节</span><span style="color:var(--primary)">周一</span></div><div class="w-item"><span class="wt">08:30</span><span class="wn">大学英语（二）</span></div><div class="w-item"><span class="wt">10:20</span><span class="wn">高等数学A（1）</span></div><div class="w-item"><span class="wt">14:30</span><span class="wn">线性代数</span></div></div>';
+      case 'c': return '<div class="w"><div class="w-name">高等数学A（1）</div><div class="w-loc">一教101 · 10:20–11:50</div><div class="w-status">⏰ 即将上课</div></div>';
+      case 'd': return '<div class="w"><div class="w-week">第 <b>3</b> 周</div><div class="w-today">今日 3 节</div><div class="w-next">下一节：高等数学A 10:20</div></div>';
+      case 'e': return '<div class="w"><div class="w-clock">09:41<small>周一</small></div><div class="w-next">下一节：高等数学A 10:20</div><div class="w-loc">一教101</div></div>';
+      case 'f': return '<div class="w"><div class="w-name">高等数学A（1）</div><div class="w-loc">一教101</div><div class="w-bar"><i style="width:62%"></i></div><div class="w-count">39 分钟后开始</div></div>';
+    }
+    return '';
+  }
+
+  function setWidget(w){
+    document.getElementById('deskW').innerHTML = widgetHtml(w);
+    document.querySelectorAll('.stylecard').forEach(function(c){ c.classList.toggle('active', c.dataset.w === w); });
+    document.querySelectorAll('.wbtn').forEach(function(b){ b.classList.toggle('active', b.dataset.w === w); });
+  }
+
+  function setTheme(t){
+    document.body.dataset.theme = t;
+    ['cream','night','paper'].forEach(function(k){ document.getElementById('tb-'+k).classList.toggle('active', k === t); });
+  }
+
+  setWidget('a');
+</script>
+</body>
+</html>

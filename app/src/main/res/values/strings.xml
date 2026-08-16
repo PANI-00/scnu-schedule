@@ -1,6 +1,7 @@
 <resources>
-    <string name="app_name">华师课程表</string>
+    <string name="app_name">scnu课程表</string>
     <string name="widget_name_next_class">下一节课</string>
     <string name="widget_name_today">今日课程</string>
     <string name="widget_name_week">周课表</string>
+    <string name="widget_name_countdown">下一节倒计时</string>
 </resources>

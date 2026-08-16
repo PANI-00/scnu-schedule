@@ -25,6 +25,7 @@ object WidgetUpdateNotifier {
             manager.getGlanceIds(NextClassWidget::class.java).forEach { NextClassWidget().update(context, it) }
             manager.getGlanceIds(TodayWidget::class.java).forEach { TodayWidget().update(context, it) }
             manager.getGlanceIds(WeekWidget::class.java).forEach { WeekWidget().update(context, it) }
+            manager.getGlanceIds(CountdownWidget::class.java).forEach { CountdownWidget().update(context, it) }
         }
     }
 }

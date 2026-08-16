@@ -30,5 +30,6 @@ class TimeTableViewModel @Inject constructor(
         viewModelScope.launch { ttRepo.upsert(tt.copy(periods = periods)) }
     fun addTimeTable(name: String, periods: List<Period>) =
         viewModelScope.launch { ttRepo.upsert(TimeTable(name = name, periods = periods)) }
+    fun deleteTimetable(id: Long) = viewModelScope.launch { ttRepo.delete(id) }
     fun updateSemester(s: Semester) = viewModelScope.launch { settingsRepo.setSemester(s) }
 }

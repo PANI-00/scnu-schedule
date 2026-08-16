@@ -20,12 +20,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.scnu.schedule.ui.theme.LocalAppPalette
+import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WeekJumpSheet(
     totalWeeks: Int,
     currentWeek: Int,
+    startDate: LocalDate?,
     onDismiss: () -> Unit,
     onJump: (Int) -> Unit,
 ) {
@@ -41,13 +43,23 @@ fun WeekJumpSheet(
                         val week = r * 4 + c
                         if (week <= totalWeeks) {
                             val selected = week == currentWeek
+                            val range = weekDateRange(startDate, week)
                             Box(
-                                modifier = Modifier.weight(1f).height(40.dp)
+                                modifier = Modifier.weight(1f).height(46.dp)
                                     .background(if (selected) p.primary else p.surfaceSoft, RoundedCornerShape(8.dp))
                                     .border(1.dp, p.hairline, RoundedCornerShape(8.dp))
                                     .clickable { onJump(week) },
                                 contentAlignment = Alignment.Center,
-                            ) { Text("W$week", fontSize = 12.sp, color = if (selected) p.onPrimary else p.muted) }
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text("第 $week 周", fontSize = 12.sp,
+                                        color = if (selected) p.onPrimary else p.ink)
+                                    if (range != null) {
+                                        Text(range, fontSize = 8.sp,
+                                            color = if (selected) p.onPrimary.copy(alpha = 0.8f) else p.mutedSoft)
+                                    }
+                                }
+                            }
                         } else Box(Modifier.weight(1f))
                     }
                 }
@@ -56,4 +68,12 @@ fun WeekJumpSheet(
         Text("共 $totalWeeks 周", fontSize = 10.sp, color = p.mutedSoft,
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp))
     }
+}
+
+/** 第 week 周的周一~周五日期范围（如 "2/23-2/27"），学期未知时返回 null。 */
+private fun weekDateRange(startDate: LocalDate?, week: Int): String? {
+    if (startDate == null) return null
+    val monday = startDate.plusWeeks((week - 1).toLong())
+    val friday = monday.plusDays(4)
+    return "${monday.monthValue}/${monday.dayOfMonth}-${friday.monthValue}/${friday.dayOfMonth}"
 }

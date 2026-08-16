@@ -50,4 +50,11 @@ class WeekCalculatorTest {
         assertTrue(week3.any { it.name == "高数" })
         assertFalse(week3.any { it.name == "大物" })
     }
+
+    @Test fun `1到15周的课在第17周不显示`() {
+        val c = Course(name = "结课早", dayOfWeek = 1, startPeriod = 1, endPeriod = 2,
+            weekPattern = WeekPattern(WeekKind.ALL, 1, 15))
+        assertTrue(WeekCalculator.coursesForWeek(listOf(c), 15).any { it.name == "结课早" })
+        assertFalse(WeekCalculator.coursesForWeek(listOf(c), 17).any { it.name == "结课早" })
+    }
 }

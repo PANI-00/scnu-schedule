@@ -1,6 +1,7 @@
 package com.scnu.schedule.data.repository
 
 import android.content.Context
+import com.scnu.schedule.data.DefaultTimeTables
 import com.scnu.schedule.data.db.PeriodEntity
 import com.scnu.schedule.data.db.TimeTableDao
 import com.scnu.schedule.data.db.TimeTableEntity
@@ -39,16 +40,15 @@ class TimeTableRepositoryImpl @Inject constructor(
         WidgetUpdateNotifier.notifyDataChanged(context)
     }
 
-    /** 首次启动无作息时，种入石牌校区默认 10 节 */
+    /** 首次启动无作息时，种入两套内置默认作息（石牌/滨海 + 大学城/南海），首个标记默认 */
     suspend fun ensureDefaultSeeded() {
         if (dao.count() == 0) {
-            val ttId = dao.upsertTimetable(TimeTableEntity(name = "石牌校区", isDefault = true))
-            val mins = listOf(
-                1 to (510 to 550), 2 to (560 to 600), 3 to (620 to 660), 4 to (670 to 710),
-                5 to (870 to 910), 6 to (920 to 960), 7 to (970 to 1010), 8 to (1020 to 1060),
-                9 to (1140 to 1180), 10 to (1190 to 1230),
-            )
-            dao.upsertPeriods(mins.map { (idx, t) -> PeriodEntity(0, ttId, idx, t.first, t.second) })
+            DefaultTimeTables.ALL.forEachIndexed { index, (name, periods) ->
+                val ttId = dao.upsertTimetable(TimeTableEntity(name = name, isDefault = index == 0))
+                dao.upsertPeriods(
+                    periods.map { (idx, s, e) -> PeriodEntity(0, ttId, idx, s, e) },
+                )
+            }
             WidgetUpdateNotifier.notifyDataChanged(context)
         }
     }

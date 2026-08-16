@@ -4,9 +4,8 @@ import com.scnu.schedule.domain.importing.ImportResult
 
 /** 教务导入 UI 状态机。 */
 sealed interface JwxtUiState {
-    data object Loading : JwxtUiState                       // WebView 初始化
-    data object LoginRequired : JwxtUiState                 // 等待用户在 WebView 登录
-    data object Fetching : JwxtUiState                      // 抓取中
+    data object Loading : JwxtUiState                  // WebView 初始化
+    data object Ready : JwxtUiState                    // 网页就绪，等待用户点「导入当前课表」
     data class Preview(val result: ImportResult) : JwxtUiState
     data object Importing : JwxtUiState
     data class Success(val count: Int) : JwxtUiState

@@ -6,6 +6,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
+import androidx.glance.action.actionStartActivity
+import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
@@ -20,17 +22,17 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
+import com.scnu.schedule.MainActivity
 import com.scnu.schedule.ui.theme.AppPalette
 import com.scnu.schedule.ui.theme.AppThemeType
-import com.scnu.schedule.ui.theme.ClaudePalette
-import com.scnu.schedule.ui.theme.OpenCodePalette
+import com.scnu.schedule.ui.theme.paletteFor
 import java.time.LocalDate
 
 /** 周课表 4×3：迷你 7 列周网格，仅渲染当前周有课（含单双周过滤）。 */
 class WeekWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val data = WidgetDataReader.load(context)
-        val palette = if (data?.theme == AppThemeType.CLAUDE) ClaudePalette else OpenCodePalette
+        val palette = paletteFor(data?.theme ?: AppThemeType.CLAUDE)
         val model = data?.let { d ->
             WidgetFormatter.weekGrid(d.courses, d.semester, LocalDate.now())
         } ?: WeekGridModel(emptyList())
@@ -43,7 +45,8 @@ fun WeekContent(model: WeekGridModel, palette: AppPalette) {
     Column(
         GlanceModifier.fillMaxSize()
             .background(ColorProvider(palette.canvas))
-            .padding(6.dp),
+            .padding(6.dp)
+            .clickable(actionStartActivity<MainActivity>()),
     ) {
         if (model.days.all { it.courses.isEmpty() }) {
             Text(

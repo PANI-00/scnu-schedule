@@ -31,9 +31,14 @@ class JwxtImportUseCaseTest {
             saved.removeAll { it.id == id }
             state.value = saved.toList()
         }
+
+        override suspend fun clearAll() {
+            saved.clear()
+            state.value = emptyList()
+        }
     }
 
-    private class FakeTtRepo(initial: List<TimeTable> = listOf(TimeTable(id = 1, name = "石牌校区", isDefault = true))) : TimeTableRepository {
+    private class FakeTtRepo(initial: List<TimeTable> = listOf(TimeTable(id = 1, name = "默认", isDefault = true))) : TimeTableRepository {
         val state = MutableStateFlow<List<TimeTable>>(initial)
         override val timetables: Flow<List<TimeTable>> = state
         override suspend fun upsert(timetable: TimeTable): Long {
@@ -78,9 +83,9 @@ class JwxtImportUseCaseTest {
         assertEquals(0L, courseRepo.saved[0].id)          // id=0 走插入
         assertEquals(0, courseRepo.saved[0].colorIndex)   // 循环取模
         assertEquals(1, courseRepo.saved[1].colorIndex)
-        assertEquals(1L, settingsRepo.activeId.value)      // 石牌默认作息
+        assertEquals(1L, settingsRepo.activeId.value)      // 默认作息
         assertEquals("2026-2027 第一学期（秋）", settingsRepo.state.value.name)
-        assertEquals(20, settingsRepo.state.value.totalWeeks)
+        assertEquals(16, settingsRepo.state.value.totalWeeks) // 由课表推导：课程最远到第 16 周
     }
 
     @Test
@@ -95,7 +100,7 @@ class JwxtImportUseCaseTest {
     }
 
     @Test
-    fun `无作息表时种入石牌默认并激活`() = runBlocking {
+    fun `无作息表时种入默认作息并激活`() = runBlocking {
         val courseRepo = FakeCourseRepo()
         val ttRepo = FakeTtRepo(emptyList())
         val settingsRepo = FakeSettingsRepo()
@@ -109,7 +114,7 @@ class JwxtImportUseCaseTest {
         )
 
         assertEquals(1, ttRepo.state.value.size)
-        assertEquals("石牌校区", ttRepo.state.value[0].name)
+        assertEquals("石牌校区、滨海校区", ttRepo.state.value[0].name)
         assertEquals(10, ttRepo.state.value[0].periods.size)
         assertEquals(ttRepo.state.value[0].id, settingsRepo.activeId.value)
     }

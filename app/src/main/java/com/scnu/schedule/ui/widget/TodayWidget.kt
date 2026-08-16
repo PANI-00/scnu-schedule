@@ -6,6 +6,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
+import androidx.glance.action.actionStartActivity
+import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
@@ -19,17 +21,17 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
+import com.scnu.schedule.MainActivity
 import com.scnu.schedule.ui.theme.AppPalette
 import com.scnu.schedule.ui.theme.AppThemeType
-import com.scnu.schedule.ui.theme.ClaudePalette
-import com.scnu.schedule.ui.theme.OpenCodePalette
+import com.scnu.schedule.ui.theme.paletteFor
 import java.time.LocalDate
 
 /** 今日课程 4×2：节次时间段 + 名称 + 地点；空态显示「今天没有课」。 */
 class TodayWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val data = WidgetDataReader.load(context)
-        val palette = if (data?.theme == AppThemeType.CLAUDE) ClaudePalette else OpenCodePalette
+        val palette = paletteFor(data?.theme ?: AppThemeType.CLAUDE)
         val today = LocalDate.now()
         val model = data?.let { d ->
             TodayWidgetModel(
@@ -51,7 +53,8 @@ fun TodayContent(model: TodayWidgetModel, palette: AppPalette) {
     Column(
         GlanceModifier.fillMaxSize()
             .background(ColorProvider(palette.canvas))
-            .padding(8.dp),
+            .padding(8.dp)
+            .clickable(actionStartActivity<MainActivity>()),
     ) {
         Text(
             "今日 · ${model.dateLabel}",

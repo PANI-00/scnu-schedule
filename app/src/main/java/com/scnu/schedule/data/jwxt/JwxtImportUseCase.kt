@@ -1,5 +1,6 @@
 package com.scnu.schedule.data.jwxt
 
+import com.scnu.schedule.data.DefaultTimeTables
 import com.scnu.schedule.domain.model.Course
 import com.scnu.schedule.domain.model.Period
 import com.scnu.schedule.domain.model.Semester
@@ -13,8 +14,9 @@ import kotlinx.coroutines.flow.first
 /**
  * 教务导入落库：
  * 1) 逐门 upsert 课程（id=0 走 Room 插入），colorIndex 循环分配课程色板下标；
- * 2) 激活「石牌校区」作息表（默认表优先）；
- * 3) 学期名/总周数写入 DataStore（保留用户已设的开学日期）。
+ * 2) 激活默认作息表（isDefault 表优先）；
+ * 3) 学期名 + 总周数写入 DataStore——总周数由导入课表推导（取课程最大周次），
+ *    保留用户已设的开学日期。
  *
  * 已知取舍 [DECISION]：MVP 不做去重，重复导入会追加课程行；后续可加"先删当学期课程再导入"。
  */
@@ -30,23 +32,28 @@ class JwxtImportUseCase @Inject constructor(
             courseRepo.upsert(course.copy(id = 0, colorIndex = index % COLOR_COUNT))
         }
         settingsRepo.setActiveTimeTable(timetableId)
-        settingsRepo.setSemester(mergeSemesterName(semesterName))
+        settingsRepo.setSemester(mergeSemesterName(semesterName, totalWeeksOf(courses)))
     }
 
-    private suspend fun mergeSemesterName(name: String): Semester {
+    /** 学期总周数由导入课表推导：取所有课程周次的最大值（如课程到第 17 周 → 17 周）。 */
+    private fun totalWeeksOf(courses: List<Course>): Int =
+        courses.mapNotNull { it.weekPattern.weeks().maxOrNull() }.maxOrNull() ?: TOTAL_WEEKS
+
+    private suspend fun mergeSemesterName(name: String, totalWeeks: Int): Semester {
         val existing = settingsRepo.semester.first()
-        return existing.copy(name = name, totalWeeks = TOTAL_WEEKS)
+        return existing.copy(name = name, totalWeeks = totalWeeks)
     }
 
     private suspend fun resolveTimetableId(): Long {
         val timetables = timeTableRepo.timetables.first()
         timetables.firstOrNull { it.isDefault }?.let { return it.id }
         timetables.firstOrNull()?.let { return it.id }
-        // 防御：无作息表时种入石牌默认（正常启动已种子化，理论不触发），upsert 直接返回新 id
+        // 防御：无作息表时种入首个内置作息（正常启动已种子化，理论不触发），upsert 直接返回新 id
+        val (name, periods) = DefaultTimeTables.FIRST
         val tt = TimeTable(
-            name = "石牌校区",
+            name = name,
             isDefault = true,
-            periods = SHIPAI_PERIODS.map { (idx, start, end) ->
+            periods = periods.map { (idx, start, end) ->
                 Period(periodIndex = idx, startMinute = start, endMinute = end)
             },
         )
@@ -59,12 +66,5 @@ class JwxtImportUseCase @Inject constructor(
 
         /** 华师一学期总周数 [VERIFY]。 */
         const val TOTAL_WEEKS = 20
-
-        /** 石牌校区默认 10 节（与 Plan 1 Task 7 种子一致）。 */
-        val SHIPAI_PERIODS: List<Triple<Int, Int, Int>> = listOf(
-            Triple(1, 510, 550), Triple(2, 560, 600), Triple(3, 620, 660), Triple(4, 670, 710),
-            Triple(5, 870, 910), Triple(6, 920, 960), Triple(7, 970, 1010), Triple(8, 1020, 1060),
-            Triple(9, 1140, 1180), Triple(10, 1190, 1230),
-        )
     }
 }

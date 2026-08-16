@@ -94,6 +94,40 @@ class ZhengFangParserTest {
     }
 
     @Test
+    fun `解析华师真实课表响应（kbList_scnu_real）`() {
+        val result = parser.parse(TestFixtures.KB_LIST_SCNU_REAL)
+        assertEquals(17, result.courses.size)
+        assertTrue(result.warnings.isEmpty())
+
+        // 真实数据里的周次格式：1-16周 / 1-15周(单) / 2-16周(双) / 9-10周
+        val weeks = result.courses.map { it.weekPattern }.toSet()
+        assertTrue(weeks.any { it.kind == WeekKind.ALL && it.rangeEnd == 16 })
+        assertTrue(weeks.any { it.kind == WeekKind.ODD })
+        assertTrue(weeks.any { it.kind == WeekKind.EVEN })
+
+        // 抽查首条：JAVA 课程，周二 5-6 节
+        val first = result.courses.first { it.name.contains("JAVA") }
+        assertEquals(2, first.dayOfWeek)
+        assertEquals(5, first.startPeriod)
+        assertEquals(6, first.endPeriod)
+        assertTrue(first.location.isNotBlank())
+    }
+
+    @Test
+    fun `周次字段 zcd 变体（正方 V9 真实字段）`() {
+        // 正方 V9 kbcx 响应中周次字段为 zcd（如 "1-16周"），旧版才用 zs/zcs。
+        val c = parser.parse("""{"kbList":[{"kcmc":"X","xqj":"1","jcs":"1-2","zcd":"1-16周"}]}""")
+            .courses.first()
+        assertEquals(WeekKind.ALL, c.weekPattern.kind)
+        assertEquals(1, c.weekPattern.rangeStart)
+        assertEquals(16, c.weekPattern.rangeEnd)
+
+        val odd = parser.parse("""{"kbList":[{"kcmc":"X","xqj":"1","jcs":"1-2","zcd":"1-16周(单)"}]}""")
+            .courses.first()
+        assertEquals(WeekKind.ODD, odd.weekPattern.kind)
+    }
+
+    @Test
     fun `星期字段变体`() {
         assertEquals(1, parseDayOnly("1"))
         assertEquals(1, parseDayOnly("星期一"))

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>华师课程表 · UI 预览</title>
+<style>
+  :root{
+    /* Claude 奶油珊瑚（默认） */
+    --canvas:#FAF9F5; --soft:#F5F0E8; --card:#EFE9DE;
+    --primary:#CC785C; --ink:#141413; --muted:#6C6A64; --mutedSoft:#8E8B82; --hair:#E6DFD8;
+    --course0:#CC785C; --course1:#5DB8A6; --course2:#E8A55A; --course3:#141413; --course4:#9A6FA0; --course5:#6B8FAF; --course6:#B07A5A; --course7:#7F9E5B;
+  }
+  body.open{
+    --canvas:#201D1D; --soft:#1A1A19; --card:#302C2C;
+    --primary:#30D158; --ink:#FDFCFC; --muted:#9A9898; --mutedSoft:#646262; --hair:#3A3A38;
+    --course0:#30D158; --course1:#007AFF; --course2:#FF9F0A; --course3:#FF3B30; --course4:#AF52DE; --course5:#5AC8FA; --course6:#FF6B5B; --course7:#8E8E93;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#d8d6d1;padding:32px;display:flex;gap:40px;justify-content:center;flex-wrap:wrap;color:var(--ink)}
+  .stage{display:flex;flex-direction:column;align-items:center;gap:12px}
+  .controls{display:flex;gap:10px;margin-bottom:4px}
+  .controls button{border:1px solid #bbb;background:#fff;color:#333;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:13px}
+  .controls button.active{background:#333;color:#fff;border-color:#333}
+  .phone{width:370px;height:780px;background:var(--canvas);border-radius:44px;box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:hidden;position:relative;border:10px solid #26221f}
+  .notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:110px;height:26px;background:#26221f;border-radius:0 0 14px 14px;z-index:50}
+  .statusbar{height:34px;display:flex;justify-content:space-between;align-items:center;padding:0 18px;font-size:12px;color:var(--muted);padding-top:6px}
+  .screen{height:calc(100% - 96px);overflow-y:auto;padding:6px 14px;scrollbar-width:none}
+  .screen::-webkit-scrollbar{display:none}
+  .nav{position:absolute;bottom:10px;left:12px;right:12px;height:56px;background:var(--card);border-radius:16px;display:flex;z-index:40}
+  .nav div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);font-size:10px;cursor:pointer}
+  .nav div.on{color:var(--primary)}
+  .nav div .ic{font-size:18px;line-height:1}
+  .screen .card{background:var(--soft);border-radius:10px;padding:12px;margin:6px 0}
+  .screen .card.card2{background:var(--card);border-radius:12px;padding:14px;margin:10px 0}
+  .muted{color:var(--muted)} .mutedSoft{color:var(--mutedSoft)} .prim{color:var(--primary)} .ink{color:var(--ink)}
+  .big{font-size:20px;font-weight:700} .title{font-size:18px;font-weight:700}
+  .sm{font-size:12px} .xs{font-size:9px}
+  /* 课表 */
+  .weekbar{display:flex;align-items:center;gap:10px;padding:6px 0}
+  .weekbar .t{flex:1;font-size:16px}
+  .dbar{display:flex;justify-content:space-between;padding:4px 0 8px}
+  .dbar div{text-align:center;width:14%}
+  .grid{display:flex;gap:4px}
+  .grid .times{width:28px;font-size:8px;color:var(--mutedSoft)}
+  .grid .col{flex:1;position:relative}
+  .cell{height:46px;background:var(--soft);border-radius:8px;margin:1px 0}
+  .cblock{position:absolute;left:0;right:0;border-radius:8px;padding:2px 4px;font-size:8px;line-height:1.25;display:flex;flex-direction:column;justify-content:center;gap:1px;overflow:hidden}
+  .cblock .cn{font-size:9px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cblock .ct{font-size:9px;font-weight:600;color:rgba(255,255,255,.9);white-space:nowrap;overflow:hidden}
+  .cblock .cb{font-size:9px;font-weight:700;line-height:1.2;color:#141413;background:#CC785C;border-radius:2px;padding:0 3px;align-self:flex-start}
+  .color0{background:var(--course0)} .color1{background:var(--course1)} .color2{background:var(--course2)} .color3{background:var(--course3)} .color4{background:var(--course4)} .color5{background:var(--course5)} .color6{background:var(--course6)} .color7{background:var(--course7)}
+  .color3 .cn{color:var(--canvas)} .color3 .ct{color:var(--muted)}
+  /* 我的 */
+  .row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;cursor:pointer}
+  .sec{font-size:14px;color:var(--muted);padding-top:16px}
+  /* 教务导入 */
+  .webview{background:#fff;border:1px solid var(--hair);border-radius:8px;height:300px;display:flex;flex-direction:column;overflow:hidden;position:relative}
+  .webbar{background:#f1efe9;padding:6px 10px;font-size:11px;color:#555;border-bottom:1px solid #ddd;display:flex;gap:6px;align-items:center}
+  .webbar .dot{width:9px;height:9px;border-radius:50%;background:#ddd;display:inline-block}
+  .webbody{padding:10px;font-size:11px;color:#333;line-height:1.7}
+  .webbody .qtbl{width:100%;border-collapse:collapse;margin-top:6px}
+  .webbody .qtbl td,.webbody .qtbl th{border:1px solid #ddd;padding:4px 3px;text-align:center;font-size:9px}
+  .webbody .qtbl th{background:#f5f5f5;color:#666}
+  .importbar{border-top:1px solid var(--hair);padding:10px;background:var(--canvas)}
+  .importbtn{width:100%;background:var(--primary);color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:600;cursor:pointer}
+  .hint{font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.5}
+  .tag{display:inline-block;background:var(--primary);color:#fff;border-radius:4px;padding:1px 6px;font-size:10px;margin-right:4px}
+  .iconbar{display:flex;gap:14px;align-items:center}
+  .hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<!-- 主题控制 -->
+<div class="stage">
+  <div class="controls">
+    <button id="btnClaude" class="active" onclick="setTheme('claude')">Claude 奶油珊瑚</button>
+    <button id="btnOpen" onclick="setTheme('open')">OpenCode TUI</button>
+  </div>
+
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="statusbar"><span>9:41</span><span>🔋 ▮▮▮</span></div>
+
+    <!-- 今日 -->
+    <div id="s-today" class="screen">
+      <div class="title">8月16日 周六</div>
+      <div class="muted sm">第 3 周</div>
+      <div class="card2">
+        <div class="sm prim" style="font-weight:700">● NEXT</div>
+        <div class="big" style="padding-top:4px">大学英语（二）</div>
+        <div class="muted sm" style="padding-top:2px">文科楼203 · 第 1-2 节 08:30</div>
+      </div>
+      <div class="card">
+        <div class="mutedSoft sm">08:30–09:10</div>
+        <div style="display:flex;justify-content:space-between;padding-top:2px">
+          <span style="font-weight:700">大学英语（二）</span><span class="muted sm">文科楼203</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="mutedSoft sm">09:20–10:00</div>
+        <div style="display:flex;justify-content:space-between;padding-top:2px">
+          <span style="font-weight:700">大学英语（二）</span><span class="muted sm">文科楼203</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="mutedSoft sm">14:30–15:10</div>
+        <div style="display:flex;justify-content:space-between;padding-top:2px">
+          <span style="font-weight:700">形势与政策</span><span class="muted sm">第一教学楼201</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 课表 -->
+    <div id="s-schedule" class="screen hidden">
+      <div class="weekbar">
+        <span class="t">课表</span>
+        <span class="prim">◂</span>
+        <span>第 3 周 ⌄</span>
+        <span class="prim">▸</span>
+      </div>
+      <div class="xs mutedSoft" style="text-align:center;margin-bottom:4px">◂ 左右滑动切换周次 ▸</div>
+      <div class="dbar">
+        <div><div>一</div><div class="xs mutedSoft">08/10</div></div>
+        <div><div>二</div><div class="xs mutedSoft">08/11</div></div>
+        <div><div>三</div><div class="xs mutedSoft">08/12</div></div>
+        <div><div>四</div><div class="xs mutedSoft">08/13</div></div>
+        <div><div>五</div><div class="xs mutedSoft">08/14</div></div>
+      </div>
+      <div class="grid">
+        <div class="times">
+          <div style="height:46px">08:30</div><div style="height:46px">09:20</div><div style="height:46px">10:20</div>
+          <div style="height:46px">11:10</div><div style="height:46px">14:30</div><div style="height:46px">15:20</div>
+          <div style="height:46px">16:10</div><div style="height:46px">17:00</div><div style="height:46px">19:00</div><div style="height:46px">19:50</div>
+        </div>
+        <div class="col">
+          <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+          <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+          <div class="cell"></div><div class="cell"></div>
+          <div class="cblock color0" style="top:0;height:92px"><span class="cn">高等数学A（1）</span><span class="ct">一教101</span></div>
+          <div class="cblock color1" style="top:92px;height:92px"><span class="cn">大学英语（二）</span><span class="ct">文科楼203</span></div>
+        </div>
+        <div class="col">
+          <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+          <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+          <div class="cell"></div><div class="cell"></div>
+          <div class="cblock color2" style="top:184px;height:92px"><span class="cn">线性代数</span><span class="ct">理科楼304</span><span class="cb">双</span></div>
+        </div>
+        <div class="col">
+          <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+          <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+          <div class="cell"></div><div class="cell"></div>
+          <div class="cblock color3" style="top:276px;height:46px"><span class="cn">大学物理实验</span><span class="ct">实验楼A401</span><span class="cb">单</span></div>
+        </div>
+        <div class="col">
+          <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+          <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+          <div class="cell"></div><div class="cell"></div>
+        </div>
+        <div class="col">
+          <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+          <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+          <div class="cell"></div><div class="cell"></div>
+          <div class="cblock color4" style="top:368px;height:92px"><span class="cn">形势与政策</span><span class="ct">一教201</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 我的 -->
+    <div id="s-settings" class="screen hidden">
+      <div class="title">我的</div>
+      <div class="sec">主题</div>
+      <div class="row"><span>Claude 奶油珊瑚</span><span class="prim">●</span></div>
+      <div class="row"><span>OpenCode TUI</span><span class="mutedSoft">○</span></div>
+      <div class="sec">学期</div>
+      <div>2025-2026 第二学期（春）</div>
+      <div class="muted sm">开学 2026-02-23 · 共 20 周</div>
+      <div class="sec">作息时间</div>
+      <div class="row"><span class="prim">管理节次时段 →</span></div>
+      <div class="sec">教务导入</div>
+      <div class="row" onclick="showImport()"><span class="prim">从华师教务系统导入本学期课表 →</span></div>
+    </div>
+
+    <!-- 教务导入 -->
+    <div id="s-import" class="screen hidden" style="padding:0 0 70px">
+      <div class="statusbar" style="padding:6px 18px"><span style="font-size:14px;color:var(--ink)">← 教务导入</span></div>
+      <div class="webview">
+        <div class="webbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span> jwxt.scnu.edu.cn/kbcx/xskbcx_cxXskbcxIndex.html?gnmkdm=N2151</div>
+        <div class="webbody">
+          <b>个人课表查询</b>
+          <div style="margin:6px 0;color:#666">学年：<b>2025-2026</b>　学期：<b>第二学期（春）</b>　⌄</div>
+          <table class="qtbl">
+            <tr><th>节次</th><th>周一</th><th>周二</th><th>周三</th><th>周四</th><th>周五</th></tr>
+            <tr><td>1-2</td><td style="background:#CC785C;color:#fff">高等数学A</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>3-4</td><td style="background:#5DB8A6;color:#fff">大学英语</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td>5-6</td><td></td><td style="background:#E8A55A;color:#fff">线性代数</td><td></td><td></td><td></td></tr>
+            <tr><td>7</td><td></td><td></td><td style="background:#9A6FA0;color:#fff">物理实验</td><td></td><td></td></tr>
+            <tr><td>9-10</td><td></td><td></td><td></td><td></td><td style="background:#6B8FAF;color:#fff">形势与政策</td></tr>
+          </table>
+          <div class="mutedSoft xs" style="margin-top:6px">课表已加载 ✓</div>
+        </div>
+      </div>
+      <div class="importbar">
+        <div class="hint">在网页中登录、选好学期，课表显示后点下方导入 —— 导入的即为页面当前显示的课表。</div>
+        <button class="importbtn">导入当前课表</button>
+      </div>
+    </div>
+
+    <div class="nav">
+      <div id="tab-today" class="on" onclick="show('today')"><span class="ic">🏠</span><span>今日</span></div>
+      <div id="tab-schedule" onclick="show('schedule')"><span class="ic">📅</span><span>课表</span></div>
+      <div id="tab-settings" onclick="show('settings')"><span class="ic">⚙️</span><span>我的</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function setTheme(t){
+    document.body.classList.toggle('open', t==='open');
+    document.getElementById('btnClaude').classList.toggle('active', t==='claude');
+    document.getElementById('btnOpen').classList.toggle('active', t==='open');
+  }
+  var prev='today';
+  function show(name){
+    ['today','schedule','settings','import'].forEach(function(s){document.getElementById('s-'+s).classList.add('hidden');});
+    document.getElementById('s-'+name).classList.remove('hidden');
+    ['today','schedule','settings'].forEach(function(t){document.getElementById('tab-'+t).classList.remove('on');});
+    if(name==='import') name='settings';
+    document.getElementById('tab-'+name).classList.add('on');
+    prev=name;
+  }
+  function showImport(){ show('import'); }
+</script>
+</body>
+</html>

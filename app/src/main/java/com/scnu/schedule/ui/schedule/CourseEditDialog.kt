@@ -9,13 +9,17 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -117,8 +121,14 @@ fun CourseEditDialog(
         },
         dismissButton = {
             if (initial != null && initial.id != 0L && onDelete != null) {
-                TextButton({ onDelete(initial.id); onDismiss() }) { Text("删除") }
-            } else TextButton(onDismiss) { Text("取消") }
+                IconButton({ onDelete(initial.id); onDismiss() }) {
+                    Icon(Icons.Outlined.DeleteOutline, contentDescription = "删除", tint = p.error)
+                }
+            } else {
+                IconButton(onDismiss) {
+                    Icon(Icons.Outlined.Close, contentDescription = "取消", tint = p.muted)
+                }
+            }
         },
     )
 }

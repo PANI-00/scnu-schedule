@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>scnu课程表 · 课程框风格库（8 套预览）</title>
+<style>
+  /* ============================================================
+     PROTOTYPE · 课程框风格库（8 套方案）
+     选定后落地到 App：CourseBlock.kt（块样式）+ Palettes.kt（色板）
+     ============================================================ */
+
+  /* ---------- 通用块机制：每个课程块按 .c0..c7 取色 var(--c) ---------- */
+  .cblock.c0{--c:var(--course0)} .cblock.c1{--c:var(--course1)} .cblock.c2{--c:var(--course2)}
+  .cblock.c3{--c:var(--course3)} .cblock.c4{--c:var(--course4)} .cblock.c5{--c:var(--course5)}
+  .cblock.c6{--c:var(--course6)} .cblock.c7{--c:var(--course7)}
+
+  .cblock{position:absolute;left:2px;right:2px;display:flex;align-items:stretch;overflow:hidden;
+    border-radius:var(--radius);background:var(--c);border:var(--border);box-shadow:var(--shadow);
+    font-family:var(--font);color:var(--fg)}
+  .cblock .bar{flex:0 0 var(--bar);background:var(--barBg,var(--c))}
+  .cblock .body{flex:1;display:flex;flex-direction:column;justify-content:center;padding:var(--pad);gap:1px;min-width:0}
+  .cblock .cn{font-size:var(--cnSize);font-weight:700;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cblock .meta{display:flex;align-items:center;gap:4px;font-size:var(--metaSize)}
+  .cblock .teacher{flex:1;color:var(--meta);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cblock .tag{color:var(--fg);font-weight:700;flex:0 0 auto}
+  .cblock .loc{font-size:var(--locSize);color:var(--meta);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  /* ---------- 8 套风格变量 ---------- */
+
+  /* ① 晨雾莫兰迪：低饱和灰调 · 柔和无描边 */
+  body[data-style="morandi"]{
+    --canvas:#F6F4EF; --soft:#EFECE4; --card:#FFFFFF; --hair:#E3DFD5; --ink:#3F3D39; --muted:#8B877C; --mutedSoft:#B3AEA2; --primary:#A7B8A8;
+    --course0:#A7B8A8; --course1:#B5A8B8; --course2:#C4B5A0; --course3:#9AA8B8; --course4:#B0A8B8; --course5:#A0B8B5; --course6:#B8A0A0; --course7:#A8A0B8;
+    --fg:#43413C; --meta:rgba(67,65,60,.72); --radius:10px; --border:none;
+    --shadow:0 2px 6px rgba(80,75,60,.10); --bar:4px; --barBg:rgba(70,65,55,.16);
+    --pad:4px 8px; --font:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    --cnSize:9.5px; --metaSize:8.5px; --locSize:9px;
+  }
+
+  /* ② 糖果活力：高饱和撞色 · 粗圆角白字 */
+  body[data-style="candy"]{
+    --canvas:#FFF9F3; --soft:#FFF1E4; --card:#FFFFFF; --hair:#F3E3D2; --ink:#3A2E28; --muted:#9C8B7E; --mutedSoft:#C4B7AA; --primary:#FF6B6B;
+    --course0:#FF6B6B; --course1:#4ECDC4; --course2:#FFB703; --course3:#6BCB77; --course4:#FF8FA3; --course5:#4D96FF; --course6:#9B5DE5; --course7:#F15BB5;
+    --fg:#FFFFFF; --meta:rgba(255,255,255,.9); --radius:12px; --border:none;
+    --shadow:0 3px 10px rgba(0,0,0,.14); --bar:0px; --barBg:transparent;
+    --pad:5px 9px; --font:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    --cnSize:9.5px; --metaSize:8.5px; --locSize:9px;
+  }
+  body[data-style="candy"] .cblock.c2{--fg:#3A2E28;--meta:rgba(58,46,40,.72)}
+
+  /* ③ 玻璃拟态：半透明磨砂 · 白描边发光 */
+  body[data-style="glass"]{
+    --canvas:linear-gradient(160deg,#C9DBFF 0%,#E8DFFF 60%,#F3E4FF 100%); --soft:rgba(255,255,255,.5); --card:rgba(255,255,255,.6); --hair:rgba(255,255,255,.7); --ink:#3B3A45; --muted:#6E6C80; --mutedSoft:#9B99AD; --primary:#6C8CFF;
+    --course0:hsla(15,85%,66%,.38); --course1:hsla(175,75%,46%,.38); --course2:hsla(42,95%,55%,.38); --course3:hsla(210,80%,60%,.38);
+    --course4:hsla(285,65%,62%,.38); --course5:hsla(155,70%,50%,.38); --course6:hsla(330,80%,62%,.38); --course7:hsla(230,70%,62%,.38);
+    --fg:#3B3A45; --meta:rgba(59,58,69,.72); --radius:14px; --border:1px solid rgba(255,255,255,.7);
+    --shadow:0 8px 24px rgba(90,90,140,.20); --bar:3px; --barBg:rgba(255,255,255,.75);
+    --pad:4px 8px; --font:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    --cnSize:9.5px; --metaSize:8.5px; --locSize:9px;
+  }
+  body[data-style="glass"] .cblock{backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+
+  /* ④ 复古报刊：粗黑描边 · 硬阴影 · 衬线 */
+  body[data-style="retro"]{
+    --canvas:#F0E8D6; --soft:#E8DEC6; --card:#FBF6EA; --hair:#D4C7A8; --ink:#262019; --muted:#83755C; --mutedSoft:#B0A488; --primary:#A8432F;
+    --course0:#B8432F; --course1:#2C6459; --course2:#C8942B; --course3:#34517E; --course4:#7D4462; --course5:#4F6E33; --course6:#9C5529; --course7:#51457A;
+    --fg:#262019; --meta:rgba(38,32,25,.75); --radius:2px; --border:2px solid #262019;
+    --shadow:3px 3px 0 rgba(38,32,25,.6); --bar:6px; --barBg:var(--c);
+    --pad:4px 8px; --font:Georgia,"Songti SC","SimSun",serif;
+    --cnSize:10px; --metaSize:8.5px; --locSize:9px;
+  }
+  body[data-style="retro"] .cblock{background:#FBF5E8}
+
+  /* ⑤ 霓虹暗夜：深底 · 霓虹发光（暗色）—— 基础变量 + 5 个包边变体 */
+  body[data-style^="neon"]{
+    --canvas:#12121A; --soft:#191924; --card:#1F1F2C; --hair:#2C2C3E; --ink:#EFEFF7; --muted:#8E8EA3; --mutedSoft:#5C5C70; --primary:#00E5FF;
+    --course0:#FF2E88; --course1:#00E5FF; --course2:#FFD60A; --course3:#7CFF6B; --course4:#B388FF; --course5:#FF9E00; --course6:#00C2FF; --course7:#FF5C5C;
+    --fg:#FFFFFF; --meta:rgba(255,255,255,.75); --radius:4px; --bar:4px; --barBg:var(--c);
+    --pad:4px 8px; --font:ui-monospace,SFMono-Regular,Consolas,"JetBrains Mono",monospace;
+    --cnSize:9px; --metaSize:8px; --locSize:8.5px;
+  }
+  body[data-style^="neon"] .cblock.c2{--fg:#1B1B26;--meta:rgba(27,27,38,.72)}
+  /* v1 原版：1.5px 细边 + 外发光 10px */
+  body[data-style="neon"]{--border:1.5px solid var(--c);--shadow:0 0 10px var(--c)}
+  body[data-style="neon"] .cblock{background:#1B1B26}
+  /* v2 细包边：2px 清晰边 + 微光 6px */
+  body[data-style="neon-edge"]{--border:2px solid var(--c);--shadow:0 0 6px var(--c)}
+  body[data-style="neon-edge"] .cblock{background:#1B1B26}
+  /* v3 粗框：3px 实心框，无发光（最清晰的包边） */
+  body[data-style="neon-frame"]{--border:3px solid var(--c);--shadow:none}
+  body[data-style="neon-frame"] .cblock{background:#1B1B26}
+  /* v4 镂空描边：透明底 + 2px 霓虹边，文字同霓虹色 */
+  body[data-style="neon-outline"]{--border:2px solid var(--c);--shadow:0 0 10px var(--c)}
+  body[data-style="neon-outline"] .cblock{background:transparent}
+  body[data-style="neon-outline"] .cblock{--fg:var(--c);--meta:var(--c)}
+  /* v5 强发光：2px 亮边 + 内外双层光晕 */
+  body[data-style="neon-glow"]{--border:2px solid var(--c);--shadow:0 0 16px var(--c),inset 0 0 10px var(--c)}
+  body[data-style="neon-glow"] .cblock{background:#13131C}
+
+  /* 奶油珊瑚 · 课程框方案（浅色纯色底 + 黑字，竖条/包边用同色深一档做层次） */
+  body[data-style^="cc-"]{
+    --canvas:#FAF9F5; --soft:#F5F0E8; --card:#EFE9DE; --hair:#E6DFD8; --ink:#141413; --muted:#6C6A64; --mutedSoft:#8E8B82; --primary:#CC785C;
+    --course0:#E8B09A; --course1:#A9D8CF; --course2:#F0C78F; --course3:#C9C7C2; --course4:#CBADD0; --course5:#AFC9DD; --course6:#D8B59E; --course7:#BFD0A8;
+    --fg:#141413; --meta:rgba(20,20,19,.66); --radius:10px; --border:none;
+    --shadow:0 2px 8px rgba(180,155,130,.14); --bar:0px; --barBg:color-mix(in srgb,var(--c) 55%,#1A1712);
+    --pad:4px 8px; --font:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    --cnSize:9.5px; --metaSize:8.5px; --locSize:9px;
+  }
+  body[data-style^="cc-"] .cblock{--cDeep:color-mix(in srgb,var(--c) 55%,#1A1712)}
+  /* 方案1 奶油纯色：浅色实心 + 左侧深色圆角竖条（当前落地版） */
+  body[data-style="cc-solid"]{--bar:4px}
+  body[data-style="cc-solid"] .cblock{background:var(--c)}
+  body[data-style="cc-solid"] .cblock .bar{width:4px;height:calc(100% - 14px);margin:7px 0;border-radius:6px;background:var(--barBg);opacity:0;flex:0 0 auto}
+  /* 方案 2 纯色深边：浅色实心 + 1.5px 同色深一档描边 */
+  body[data-style="cc-edge"]{--border:1.5px solid var(--cDeep)}
+  body[data-style="cc-edge"] .cblock{background:var(--c)}
+  /* 方案 3 白卡彩边：白底 + 2px 课程色描边 */
+  body[data-style="cc-white"]{--border:2px solid var(--c)}
+  body[data-style="cc-white"] .cblock{background:#FFFFFF}
+  /* 方案 4 顶部深条：浅色实心 + 顶部 3px 同色深横条 */
+  body[data-style="cc-top"]{--shadow:inset 0 3px 0 var(--cDeep),0 2px 8px rgba(180,155,130,.14)}
+  body[data-style="cc-top"] .cblock{background:var(--c)}
+  /* 方案 5 底部深条：浅色实心 + 底部 3px 同色深横条 */
+  body[data-style="cc-bottom"]{--shadow:inset 0 -3px 0 var(--cDeep),0 2px 8px rgba(180,155,130,.14)}
+  body[data-style="cc-bottom"] .cblock{background:var(--c)}
+  /* 方案 6 深浅拼接：左 28% 深色 + 右 72% 浅色 */
+  body[data-style="cc-split"] .cblock{background:linear-gradient(90deg,var(--cDeep) 0 28%,var(--c) 28% 100%)}
+
+  /* ⑥ 线性极简：白卡细边 · 左色条（Notion/Linear 风） */
+  body[data-style="linear"]{
+    --canvas:#F7F7F5; --soft:#EFEFED; --card:#FFFFFF; --hair:#E4E4E1; --ink:#1F1F1E; --muted:#8A8A86; --mutedSoft:#B5B5B0; --primary:#4C8DE8;
+    --course0:#E8604C; --course1:#4C8DE8; --course2:#34A853; --course3:#F2A93B; --course4:#9C5CE8; --course5:#3BB6C8; --course6:#E85C8D; --course7:#8AA03F;
+    --fg:#1F1F1E; --meta:rgba(31,31,30,.6); --radius:10px; --border:1px solid #E6E6E3;
+    --shadow:none; --bar:4px; --barBg:var(--c);
+    --pad:4px 9px; --font:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    --cnSize:9.5px; --metaSize:8.5px; --locSize:9px;
+  }
+  body[data-style="linear"] .cblock{background:#FFFFFF}
+
+  /* ⑦ 深夜蓝调：深蓝底 · 半透明块 + 彩条（暗色） */
+  body[data-style="deepblue"]{
+    --canvas:#101A2E; --soft:#16233C; --card:#1C2A45; --hair:#2A3B5C; --ink:#F2F5FB; --muted:#93A3C0; --mutedSoft:#5D6E8F; --primary:#5B8DEF;
+    --course0:#5B8DEF; --course1:#4FD1C5; --course2:#F6C15B; --course3:#F47C7C; --course4:#A78BFA; --course5:#F472B6; --course6:#34D399; --course7:#FB923C;
+    --fg:#FFFFFF; --meta:rgba(255,255,255,.75); --radius:12px; --border:1px solid rgba(255,255,255,.18);
+    --shadow:none; --bar:4px; --barBg:var(--c);
+    --pad:4px 8px; --font:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    --cnSize:9.5px; --metaSize:8.5px; --locSize:9px;
+  }
+  body[data-style="deepblue"] .cblock{background:rgba(255,255,255,.08)}
+
+  /* ⑧ 活力渐变：双色渐变块 · 大圆角白字 */
+  body[data-style="gradient"]{
+    --canvas:#FAFAF6; --soft:#F1F1EA; --card:#FFFFFF; --hair:#E7E7DF; --ink:#232323; --muted:#8F8F88; --mutedSoft:#B8B8B0; --primary:#FC5C7D;
+    --course0:linear-gradient(135deg,#FF6B6B,#FF9A5A); --course1:linear-gradient(135deg,#36D1DC,#5B86E5); --course2:linear-gradient(135deg,#F7971E,#FFD200);
+    --course3:linear-gradient(135deg,#11998E,#38EF7D); --course4:linear-gradient(135deg,#B24592,#F15F79); --course5:linear-gradient(135deg,#4568DC,#B06AB3);
+    --course6:linear-gradient(135deg,#FC5C7D,#6A82FB); --course7:linear-gradient(135deg,#F857A6,#FF5858);
+    --fg:#FFFFFF; --meta:rgba(255,255,255,.9); --radius:14px; --border:none;
+    --shadow:0 4px 12px rgba(0,0,0,.14); --bar:0px; --barBg:transparent;
+    --pad:5px 9px; --font:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    --cnSize:9.5px; --metaSize:8.5px; --locSize:9px;
+  }
+  body[data-style="gradient"] .cblock.c2,body[data-style="gradient"] .cblock.c3{--fg:#2B2B26;--meta:rgba(43,43,38,.72)}
+
+  /* ============================================================ */
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#E8E6E1;color:#26241f;padding:28px 20px 60px}
+  .proto-badge{display:inline-block;background:#26241f;color:#fff;font-size:11px;padding:3px 10px;border-radius:999px;letter-spacing:.5px}
+  h1{font-size:22px;margin:10px 0 4px}
+  .sub{font-size:13px;color:#6f6b63;margin-bottom:22px;line-height:1.6}
+
+  /* 风格对比卡 */
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;max-width:1280px;margin:0 auto}
+  .stylecard{background:#fff;border:2px solid #ddd;border-radius:14px;padding:14px;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+  .stylecard.active{border-color:#26241f;box-shadow:0 6px 20px rgba(0,0,0,.12)}
+  .sc-head{display:flex;align-items:baseline;gap:8px}
+  .sc-name{font-size:15px;font-weight:700}
+  .sc-no{font-size:11px;color:#999;font-weight:600}
+  .sc-desc{font-size:12px;color:#8a867e;margin:3px 0 10px}
+  .sc-blocks{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+  .stylecard .cblock{position:relative;left:0;right:0}
+  .sc-s2{height:56px}
+  .sc-s1{height:30px}
+  .sc-swatches{display:flex;gap:4px}
+  .sc-swatches i{flex:1;height:14px;border-radius:4px;background:var(--c,#ccc)}
+  .sc-swatches i:nth-child(1){background:var(--course0)} .sc-swatches i:nth-child(2){background:var(--course1)}
+  .sc-swatches i:nth-child(3){background:var(--course2)} .sc-swatches i:nth-child(4){background:var(--course3)}
+  .sc-swatches i:nth-child(5){background:var(--course4)} .sc-swatches i:nth-child(6){background:var(--course5)}
+  .sc-swatches i:nth-child(7){background:var(--course6)} .sc-swatches i:nth-child(8){background:var(--course7)}
+  .sc-canvas{display:flex;align-items:center;gap:8px;margin-top:10px}
+  .sc-canvas .chip{width:22px;height:22px;border-radius:6px;border:1px solid #e0ded8;background:var(--canvas)}
+  .sc-canvas span{font-size:11px;color:#999}
+  .variants-title{font-size:16px;max-width:1280px;margin:30px auto 12px;padding:0 4px}
+
+  /* 手机模拟器 */
+  .stage{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:34px}
+  .stage h2{font-size:17px}
+  .sbtnrow{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:760px}
+  .sbtn{border:1px solid #bbb;background:#fff;color:#333;padding:7px 14px;border-radius:10px;cursor:pointer;font-size:13px}
+  .sbtn.active{background:#26241f;color:#fff;border-color:#26241f}
+  .phone{width:370px;height:780px;background:var(--canvas);border-radius:44px;box-shadow:0 20px 60px rgba(0,0,0,.35);overflow:hidden;position:relative;border:10px solid #26221f}
+  .notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:110px;height:26px;background:#26221f;border-radius:0 0 14px 14px;z-index:50}
+  .statusbar{height:34px;display:flex;justify-content:space-between;align-items:center;padding:0 18px;font-size:12px;color:var(--muted);padding-top:6px}
+  .screen{height:calc(100% - 96px);overflow-y:auto;padding:6px 14px;scrollbar-width:none}
+  .screen::-webkit-scrollbar{display:none}
+  .nav{position:absolute;bottom:10px;left:12px;right:12px;height:56px;background:var(--card);border-radius:16px;display:flex;z-index:40}
+  .nav div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);font-size:10px;cursor:pointer}
+  .nav div.on{color:var(--primary)}
+  .nav div .ic{font-size:18px;line-height:1}
+  .weekbar{display:flex;align-items:center;gap:10px;padding:6px 0;color:var(--ink)}
+  .weekbar .t{flex:1;font-size:16px}
+  .prim{color:var(--primary)}
+  .dbar{display:flex;justify-content:space-between;padding:4px 0 8px;color:var(--ink)}
+  .dbar div{text-align:center;width:14%}
+  .xs{font-size:9px}
+  .mutedSoft{color:var(--mutedSoft)}
+  .grid{display:flex;gap:4px}
+  .grid .times{width:28px;font-size:8px;color:var(--mutedSoft)}
+  .cell{height:46px;background:var(--soft);border-radius:8px;margin:1px 0}
+  .hintline{font-size:10px;color:var(--muted);text-align:center;margin:2px 0 6px}
+  .note{max-width:760px;font-size:12px;color:#6f6b63;line-height:1.7;text-align:center;margin-top:14px}
+</style>
+</head>
+<body data-style="morandi">
+
+<span class="proto-badge">PROTOTYPE · 原型预览</span>
+<h1>课程框风格库 · 8 套方案</h1>
+<div class="sub">为替换「OpenCode TUI」课程框而做的 8 套备选风格。点击风格卡或下方按钮切换，右侧/下方手机模拟器联动预览完整课表。
+文字布局遵循既定规则：左对齐、文字区与左右边界等距、单/双周为教师行最右侧纯文字标签。选定后落地到 App（CourseBlock.kt + Palettes.kt）。</div>
+
+<!-- 风格对比卡 -->
+<div class="cards">
+  <div class="stylecard active" data-s="morandi" onclick="setStyle('morandi')">
+    <div class="sc-head"><span class="sc-name">晨雾莫兰迪</span><span class="sc-no">01</span></div>
+    <div class="sc-desc">低饱和灰调色板 · 柔和无描边 · 克制的投影</div>
+    <div class="sc-blocks">
+      <div class="cblock c0 sc-s2"><div class="bar"></div><div class="body"><div class="cn">高等数学A（1）</div><div class="meta"><span class="teacher">王建国</span><span class="tag">双周</span></div><div class="loc">一教101</div></div></div>
+      <div class="cblock c3 sc-s1"><div class="bar"></div><div class="body"><div class="cn">大学物理实验</div><div class="meta"><span class="teacher">实验楼A401</span><span class="tag">单周</span></div></div></div>
+    </div>
+    <div class="sc-swatches"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="sc-canvas"><div class="chip"></div><span>页面底色</span></div>
+  </div>
+
+  <div class="stylecard" data-s="candy" onclick="setStyle('candy')">
+    <div class="sc-head"><span class="sc-name">糖果活力</span><span class="sc-no">02</span></div>
+    <div class="sc-desc">高饱和撞色 · 粗圆角 · 白字（黄块自动深字）</div>
+    <div class="sc-blocks">
+      <div class="cblock c0 sc-s2"><div class="body"><div class="cn">高等数学A（1）</div><div class="meta"><span class="teacher">王建国</span><span class="tag">双周</span></div><div class="loc">一教101</div></div></div>
+      <div class="cblock c2 sc-s1"><div class="body"><div class="cn">线性代数</div><div class="meta"><span class="teacher">理科楼304</span><span class="tag">双周</span></div></div></div>
+    </div>
+    <div class="sc-swatches"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="sc-canvas"><div class="chip"></div><span>页面底色</span></div>
+  </div>
+
+  <div class="stylecard" data-s="glass" onclick="setStyle('glass')">
+    <div class="sc-head"><span class="sc-name">玻璃拟态</span><span class="sc-no">03</span></div>
+    <div class="sc-desc">半透明磨砂 + 白描边 · 蓝紫渐变壁纸底</div>
+    <div class="sc-blocks">
+      <div class="cblock c0 sc-s2"><div class="bar"></div><div class="body"><div class="cn">高等数学A（1）</div><div class="meta"><span class="teacher">王建国</span><span class="tag">双周</span></div><div class="loc">一教101</div></div></div>
+      <div class="cblock c5 sc-s1"><div class="bar"></div><div class="body"><div class="cn">形势与政策</div><div class="meta"><span class="teacher">一教201</span><span class="tag">单周</span></div></div></div>
+    </div>
+    <div class="sc-swatches"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="sc-canvas"><div class="chip"></div><span>页面底色（渐变）</span></div>
+  </div>
+
+  <div class="stylecard" data-s="retro" onclick="setStyle('retro')">
+    <div class="sc-head"><span class="sc-name">复古报刊</span><span class="sc-no">04</span></div>
+    <div class="sc-desc">米纸底 · 粗黑描边 + 硬阴影 · 衬线标题</div>
+    <div class="sc-blocks">
+      <div class="cblock c0 sc-s2"><div class="bar"></div><div class="body"><div class="cn">高等数学A（1）</div><div class="meta"><span class="teacher">王建国</span><span class="tag">双周</span></div><div class="loc">一教101</div></div></div>
+      <div class="cblock c1 sc-s1"><div class="bar"></div><div class="body"><div class="cn">大学英语（二）</div><div class="meta"><span class="teacher">文科楼203</span><span class="tag">单周</span></div></div></div>
+    </div>
+    <div class="sc-swatches"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="sc-canvas"><div class="chip"></div><span>页面底色</span></div>
+  </div>
+
+  <div class="stylecard" data-s="neon" onclick="setStyle('neon')">
+    <div class="sc-head"><span class="sc-name">霓虹暗夜</span><span class="sc-no">05</span></div>
+    <div class="sc-desc">深色底 · 霓虹描边发光 · 等宽字体（暗色）</div>
+    <div class="sc-blocks">
+      <div class="cblock c1 sc-s2"><div class="bar"></div><div class="body"><div class="cn">高等数学A（1）</div><div class="meta"><span class="teacher">王建国</span><span class="tag">双周</span></div><div class="loc">一教101</div></div></div>
+      <div class="cblock c0 sc-s1"><div class="bar"></div><div class="body"><div class="cn">大学物理实验</div><div class="meta"><span class="teacher">实验楼A401</span><span class="tag">单周</span></div></div></div>
+    </div>
+    <div class="sc-swatches"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="sc-canvas"><div class="chip"></div><span>页面底色</span></div>
+  </div>
+
+  <div class="stylecard" data-s="linear" onclick="setStyle('linear')">
+    <div class="sc-head"><span class="sc-name">线性极简</span><span class="sc-no">06</span></div>
+    <div class="sc-desc">白卡细描边 · 左侧彩色条 · Notion/Linear 风</div>
+    <div class="sc-blocks">
+      <div class="cblock c0 sc-s2"><div class="bar"></div><div class="body"><div class="cn">高等数学A（1）</div><div class="meta"><span class="teacher">王建国</span><span class="tag">双周</span></div><div class="loc">一教101</div></div></div>
+      <div class="cblock c3 sc-s1"><div class="bar"></div><div class="body"><div class="cn">线性代数</div><div class="meta"><span class="teacher">理科楼304</span><span class="tag">双周</span></div></div></div>
+    </div>
+    <div class="sc-swatches"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="sc-canvas"><div class="chip"></div><span>页面底色</span></div>
+  </div>
+
+  <div class="stylecard" data-s="deepblue" onclick="setStyle('deepblue')">
+    <div class="sc-head"><span class="sc-name">深夜蓝调</span><span class="sc-no">07</span></div>
+    <div class="sc-desc">深蓝渐变底 · 半透明块 + 彩色条 · 沉稳暗色</div>
+    <div class="sc-blocks">
+      <div class="cblock c0 sc-s2"><div class="bar"></div><div class="body"><div class="cn">高等数学A（1）</div><div class="meta"><span class="teacher">王建国</span><span class="tag">双周</span></div><div class="loc">一教101</div></div></div>
+      <div class="cblock c2 sc-s1"><div class="bar"></div><div class="body"><div class="cn">线性代数</div><div class="meta"><span class="teacher">理科楼304</span><span class="tag">双周</span></div></div></div>
+    </div>
+    <div class="sc-swatches"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="sc-canvas"><div class="chip"></div><span>页面底色</span></div>
+  </div>
+
+  <div class="stylecard" data-s="gradient" onclick="setStyle('gradient')">
+    <div class="sc-head"><span class="sc-name">活力渐变</span><span class="sc-no">08</span></div>
+    <div class="sc-desc">双色渐变块 · 大圆角 · 白字（亮色块自动深字）</div>
+    <div class="sc-blocks">
+      <div class="cblock c0 sc-s2"><div class="body"><div class="cn">高等数学A（1）</div><div class="meta"><span class="teacher">王建国</span><span class="tag">双周</span></div><div class="loc">一教101</div></div></div>
+      <div class="cblock c4 sc-s1"><div class="body"><div class="cn">大学物理实验</div><div class="meta"><span class="teacher">实验楼A401</span><span class="tag">单周</span></div></div></div>
+    </div>
+    <div class="sc-swatches"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="sc-canvas"><div class="chip"></div><span>页面底色</span></div>
+  </div>
+</div>
+
+<h2 class="variants-title">霓虹暗夜 · 包边变体（点击卡片联动手机预览）</h2>
+<div class="cards">
+  <div class="stylecard" data-s="neon" onclick="setStyle('neon')">
+    <div class="sc-head"><span class="sc-name">霓虹 v1 原版</span><span class="sc-no">当前</span></div>
+    <div class="sc-desc">1.5px 细边 + 外发光 10px · 深底实心</div>
+    <div class="sc-blocks">
+      <div class="cblock c1 sc-s2"><div class="bar"></div><div class="body"><div class="cn">高等数学A（1）</div><div class="meta"><span class="teacher">王建国</span><span class="tag">双周</span></div><div class="loc">一教101</div></div></div>
+    </div>
+    <div class="sc-swatches"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  </div>
+  <div class="stylecard" data-s="neon-edge" onclick="setStyle('neon-edge')">
+    <div class="sc-head"><span class="sc-name">霓虹 v2 细包边</span><span class="sc-no">推荐</span></div>
+    <div class="sc-desc">2px 清晰霓虹描边 + 微光 6px · 轮廓更利落</div>
+    <div class="sc-blocks">
+      <div class="cblock c1 sc-s2"><div class="bar"></div><div class="body"><div class="cn">高等数学A（1）</div><div class="meta"><span class="teacher">王建国</span><span class="tag">双周</span></div><div class="loc">一教101</div></div></div>
+    </div>
+    <div class="sc-swatches"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  </div>
+  <div class="stylecard" data-s="neon-frame" onclick="setStyle('neon-frame')">
+    <div class="sc-head"><span class="sc-name">霓虹 v3 粗框</span><span class="sc-no"></span></div>
+    <div class="sc-desc">3px 实心粗框 · 无发光 · 最清晰的包边</div>
+    <div class="sc-blocks">
+      <div class="cblock c1 sc-s2"><div class="bar"></div><div class="body"><div class="cn">高等数学A（1）</div><div class="meta"><span class="teacher">王建国</span><span class="tag">双周</span></div><div class="loc">一教101</div></div></div>
+    </div>
+    <div class="sc-swatches"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  </div>
+  <div class="stylecard" data-s="neon-outline" onclick="setStyle('neon-outline')">
+    <div class="sc-head"><span class="sc-name">霓虹 v4 镂空描边</span><span class="sc-no"></span></div>
+    <div class="sc-desc">透明底 + 2px 霓虹边 · 文字同色霓虹字</div>
+    <div class="sc-blocks">
+      <div class="cblock c1 sc-s2"><div class="bar"></div><div class="body"><div class="cn">高等数学A（1）</div><div class="meta"><span class="teacher">王建国</span><span class="tag">双周</span></div><div class="loc">一教101</div></div></div>
+    </div>
+    <div class="sc-swatches"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  </div>
+  <div class="stylecard" data-s="neon-glow" onclick="setStyle('neon-glow')">
+    <div class="sc-head"><span class="sc-name">霓虹 v5 强发光</span><span class="sc-no"></span></div>
+    <div class="sc-desc">2px 亮边 + 内外双层光晕 · 最有氛围感</div>
+    <div class="sc-blocks">
+      <div class="cblock c1 sc-s2"><div class="bar"></div><div class="body"><div class="cn">高等数学A（1）</div><div class="meta"><span class="teacher">王建国</span><span class="tag">双周</span></div><div class="loc">一教101</div></div></div>
+    </div>
+    <div class="sc-swatches"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  </div>
+</div>
+
+<h2 class="variants-title">奶油珊瑚 · 课程框方案（纯色版 · 全部不透明，点击卡片联动手机预览）</h2>
+<div class="cards">
+  <div class="stylecard" data-s="cc-solid" onclick="setStyle('cc-solid')">
+    <div class="sc-head"><span class="sc-name">方案1 奶油纯色</span><span class="sc-no">当前落地</span></div>
+    <div class="sc-desc">浅色实心底 + 黑字 + 左侧深色圆角竖条</div>
+    <div class="sc-blocks">
+      <div class="cblock c0 sc-s2"><div class="bar"></div><div class="body"><div class="cn">高等数学A（1）</div><div class="meta"><span class="teacher">王建国</span><span class="tag">双周</span></div><div class="loc">一教101</div></div></div>
+    </div>
+    <div class="sc-swatches"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  </div>
+  <div class="stylecard" data-s="cc-edge" onclick="setStyle('cc-edge')">
+    <div class="sc-head"><span class="sc-name">方案2 纯色深边</span><span class="sc-no"></span></div>
+    <div class="sc-desc">浅色实心 + 1.5px 同色深一档描边 · 有层次</div>
+    <div class="sc-blocks">
+      <div class="cblock c1 sc-s2"><div class="bar"></div><div class="body"><div class="cn">高等数学A（1）</div><div class="meta"><span class="teacher">王建国</span><span class="tag">双周</span></div><div class="loc">一教101</div></div></div>
+    </div>
+    <div class="sc-swatches"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  </div>
+  <div class="stylecard" data-s="cc-white" onclick="setStyle('cc-white')">
+    <div class="sc-head"><span class="sc-name">方案3 白卡彩边</span><span class="sc-no"></span></div>
+    <div class="sc-desc">白底 + 2px 课程色描边 · 清爽明快</div>
+    <div class="sc-blocks">
+      <div class="cblock c2 sc-s2"><div class="bar"></div><div class="body"><div class="cn">高等数学A（1）</div><div class="meta"><span class="teacher">王建国</span><span class="tag">双周</span></div><div class="loc">一教101</div></div></div>
+    </div>
+    <div class="sc-swatches"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  </div>
+  <div class="stylecard" data-s="cc-top" onclick="setStyle('cc-top')">
+    <div class="sc-head"><span class="sc-name">方案4 顶部深条</span><span class="sc-no"></span></div>
+    <div class="sc-desc">浅色实心 + 顶部 3px 同色深横条 · 标签感</div>
+    <div class="sc-blocks">
+      <div class="cblock c4 sc-s2"><div class="bar"></div><div class="body"><div class="cn">高等数学A（1）</div><div class="meta"><span class="teacher">王建国</span><span class="tag">双周</span></div><div class="loc">一教101</div></div></div>
+    </div>
+    <div class="sc-swatches"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  </div>
+  <div class="stylecard" data-s="cc-bottom" onclick="setStyle('cc-bottom')">
+    <div class="sc-head"><span class="sc-name">方案5 底部深条</span><span class="sc-no"></span></div>
+    <div class="sc-desc">浅色实心 + 底部 3px 同色深横条 · 稳重</div>
+    <div class="sc-blocks">
+      <div class="cblock c5 sc-s2"><div class="bar"></div><div class="body"><div class="cn">高等数学A（1）</div><div class="meta"><span class="teacher">王建国</span><span class="tag">双周</span></div><div class="loc">一教101</div></div></div>
+    </div>
+    <div class="sc-swatches"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  </div>
+  <div class="stylecard" data-s="cc-split" onclick="setStyle('cc-split')">
+    <div class="sc-head"><span class="sc-name">方案6 深浅拼接</span><span class="sc-no"></span></div>
+    <div class="sc-desc">左 28% 深色 + 右 72% 浅色 · 拼接撞色</div>
+    <div class="sc-blocks">
+      <div class="cblock c6 sc-s2"><div class="bar"></div><div class="body"><div class="cn">高等数学A（1）</div><div class="meta"><span class="teacher">王建国</span><span class="tag">双周</span></div><div class="loc">一教101</div></div></div>
+    </div>
+    <div class="sc-swatches"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  </div>
+</div>
+
+<!-- 手机模拟器 -->
+<div class="stage">
+  <h2>手机端完整课表预览</h2>
+  <div class="sbtnrow" id="sbtnrow"></div>
+  <div class="sbtnrow" id="neonbtnrow"></div>
+  <div class="sbtnrow" id="claudebtnrow"></div>
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="statusbar"><span>9:41</span><span>🔋 ▮▮▮</span></div>
+    <div id="s-schedule" class="screen">
+      <div class="weekbar">
+        <span class="t">课表</span>
+        <span class="prim">◂</span>
+        <span>第 3 周 ⌄</span>
+        <span class="prim">▸</span>
+      </div>
+      <div class="hintline">◂ 左右滑动切换周次 ▸</div>
+      <div class="dbar">
+        <div><div>一</div><div class="xs mutedSoft">08/10</div></div>
+        <div><div>二</div><div class="xs mutedSoft">08/11</div></div>
+        <div><div>三</div><div class="xs mutedSoft">08/12</div></div>
+        <div><div>四</div><div class="xs mutedSoft">08/13</div></div>
+        <div><div>五</div><div class="xs mutedSoft">08/14</div></div>
+      </div>
+      <div class="grid">
+        <div class="times">
+          <div style="height:46px">08:30</div><div style="height:46px">09:20</div><div style="height:46px">10:20</div>
+          <div style="height:46px">11:10</div><div style="height:46px">14:30</div><div style="height:46px">15:20</div>
+          <div style="height:46px">16:10</div><div style="height:46px">17:00</div><div style="height:46px">19:00</div><div style="height:46px">19:50</div>
+        </div>
+        <div class="col" style="position:relative;flex:1">
+          <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+          <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+          <div class="cell"></div><div class="cell"></div>
+          <div class="cblock c0" style="top:0;height:92px"><div class="bar"></div><div class="body"><div class="cn">高等数学A（1）</div><div class="meta"><span class="teacher">王建国</span><span class="tag">双周</span></div><div class="loc">一教101</div></div></div>
+          <div class="cblock c1" style="top:92px;height:92px"><div class="bar"></div><div class="body"><div class="cn">大学英语（二）</div><div class="meta"><span class="teacher">李慧</span><span class="tag">双周</span></div><div class="loc">文科楼203</div></div></div>
+        </div>
+        <div class="col" style="position:relative;flex:1">
+          <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+          <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+          <div class="cell"></div><div class="cell"></div>
+          <div class="cblock c2" style="top:184px;height:92px"><div class="bar"></div><div class="body"><div class="cn">线性代数</div><div class="meta"><span class="teacher">陈晨</span><span class="tag">双周</span></div><div class="loc">理科楼304</div></div></div>
+          <div class="cblock c3" style="top:276px;height:46px"><div class="bar"></div><div class="body"><div class="cn">大学物理实验</div><div class="meta"><span class="teacher">实验楼A401</span><span class="tag">单周</span></div></div></div>
+        </div>
+        <div class="col" style="position:relative;flex:1">
+          <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+          <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+          <div class="cell"></div><div class="cell"></div>
+        </div>
+        <div class="col" style="position:relative;flex:1">
+          <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+          <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+          <div class="cell"></div><div class="cell"></div>
+        </div>
+        <div class="col" style="position:relative;flex:1">
+          <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+          <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+          <div class="cell"></div><div class="cell"></div>
+          <div class="cblock c4" style="top:368px;height:92px"><div class="bar"></div><div class="body"><div class="cn">形势与政策</div><div class="meta"><span class="teacher">赵敏</span><span class="tag">双周</span></div><div class="loc">一教201</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="nav">
+      <div class="on"><span class="ic">🏠</span><span>今日</span></div>
+      <div><span class="ic">📅</span><span>课表</span></div>
+      <div><span class="ic">⚙️</span><span>我的</span></div>
+    </div>
+  </div>
+  <div class="note">
+    浏览器打开即可预览（无需服务器）。选定风格后告诉我编号/名称，我会把该套落地到 App：
+    替换 OpenCode TUI 的课程框样式与色板（CourseBlock.kt / Palettes.kt），并保持两套主题的切换逻辑不变。
+  </div>
+</div>
+
+<script>
+  var STYLES = [
+    ['morandi','晨雾莫兰迪'],['candy','糖果活力'],['glass','玻璃拟态'],['retro','复古报刊'],
+    ['neon','霓虹暗夜'],['linear','线性极简'],['deepblue','深夜蓝调'],['gradient','活力渐变']
+  ];
+  var btnRow = document.getElementById('sbtnrow');
+  STYLES.forEach(function(s){
+    var b = document.createElement('button');
+    b.className = 'sbtn' + (s[0] === document.body.dataset.style ? ' active' : '');
+    b.dataset.s = s[0];
+    b.textContent = s[1];
+    b.onclick = function(){ setStyle(s[0]); };
+    btnRow.appendChild(b);
+  });
+  var NEON_STYLES = [
+    ['neon','霓虹 v1 原版'],['neon-edge','v2 细包边'],['neon-frame','v3 粗框'],
+    ['neon-outline','v4 镂空描边'],['neon-glow','v5 强发光']
+  ];
+  var neonRow = document.getElementById('neonbtnrow');
+  NEON_STYLES.forEach(function(s){
+    var b = document.createElement('button');
+    b.className = 'sbtn' + (s[0] === document.body.dataset.style ? ' active' : '');
+    b.dataset.s = s[0];
+    b.textContent = s[1];
+    b.onclick = function(){ setStyle(s[0]); };
+    neonRow.appendChild(b);
+  });
+  var CLAUDE_STYLES = [
+    ['cc-solid','方案1 奶油纯色'],['cc-edge','方案2 纯色深边'],['cc-white','方案3 白卡彩边'],
+    ['cc-top','方案4 顶部深条'],['cc-bottom','方案5 底部深条'],['cc-split','方案6 深浅拼接']
+  ];
+  var claudeRow = document.getElementById('claudebtnrow');
+  CLAUDE_STYLES.forEach(function(s){
+    var b = document.createElement('button');
+    b.className = 'sbtn' + (s[0] === document.body.dataset.style ? ' active' : '');
+    b.dataset.s = s[0];
+    b.textContent = s[1];
+    b.onclick = function(){ setStyle(s[0]); };
+    claudeRow.appendChild(b);
+  });
+  function setStyle(s){
+    document.body.dataset.style = s;
+    document.querySelectorAll('.stylecard').forEach(function(c){ c.classList.toggle('active', c.dataset.s === s); });
+    document.querySelectorAll('.sbtn').forEach(function(b){ b.classList.toggle('active', b.dataset.s === s); });
+  }
+</script>
+</body>
+</html>

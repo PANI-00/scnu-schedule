@@ -9,4 +9,7 @@ object TestFixtures {
     }
 
     val KB_LIST_SAMPLE: String by lazy { read("kbList_sample.json") }
+
+    /** 华师真实响应（2026-08-16 从 jwxt.scnu.edu.cn 个人课表查询页实测，17 门课）。 */
+    val KB_LIST_SCNU_REAL: String by lazy { read("kbList_scnu_real.json") }
 }

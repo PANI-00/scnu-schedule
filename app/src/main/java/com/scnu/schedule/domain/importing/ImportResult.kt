@@ -12,4 +12,6 @@ data class ImportWarning(
 data class ImportResult(
     val courses: List<Course>,
     val warnings: List<ImportWarning> = emptyList(),
+    /** 调试用：抓取到的原始响应片段（客户端填入）。空结果时由 UI 展示以定位接口问题。 */
+    val rawPreview: String = "",
 )

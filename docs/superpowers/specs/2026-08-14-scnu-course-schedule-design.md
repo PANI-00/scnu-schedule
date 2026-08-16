@@ -14,7 +14,7 @@
 - **课表页**：周分页（左右滑动看上一/下一周）、点击周标题弹「跳转周次」选择器、单双周课程、日期条（周几 + 月/日）、按作息表渲染、点空格新建课程、长按课程编辑/删除
 - **今日页**：今日课程时间线 + 下一节课卡片
 - **我的页**：主题切换（Claude 默认 / OpenCode TUI）、作息时间管理、教务导入入口
-- **教务导入**：WebView 登录华师正方 → 抓取课表 → 解析 → 预览勾选 → 一键建课（自动激活石牌作息）
+- **教务导入**：WebView 登录华师正方 → 抓取课表 → 解析 → 预览勾选 → 一键建课（自动激活默认作息）
 - **桌面小组件**（Jetpack Glance）：
   - 下一节课 2×1（课程名 + 地点 + 开始时间/倒计时）
   - 今日课程 4×2（今天所有课 + 节次时间段）
@@ -62,11 +62,13 @@ com.scnu.schedule/
 |---|---|---|
 | **Course** | id, name, teacher, location, dayOfWeek(1-7), startPeriod, endPeriod, weekPatternId, colorIndex, timetableId | 一门课；start/endPeriod 对应作息表节次号 |
 | **WeekPattern** | id, kind(ALL/ODD/EVEN/CUSTOM), rangeStart, rangeEnd, customWeeks | 上课周模式；`1-16` / `单周` / `双周` / 自定义周集合 |
-| **TimeTable** | id, name, isDefault, active | 作息表；**默认内置「石牌校区」10 节** |
+| **TimeTable** | id, name, isDefault, active | 作息表；**默认内置两套（石牌/滨海、大学城/南海），各 10 节** |
 | **Period** | id, timetableId, periodIndex, startTime, endTime | 节次时段；可增删改 |
 | **Semester** | id, name(2026秋), startDate, totalWeeks(20) | 周次计算基准 |
 
-### 默认作息 = 华师石牌校区（官方文件）
+### 默认作息 = 华师两套官方作息（首次启动种入，石牌为默认）
+
+**石牌校区、滨海校区**
 
 | 节次 | 时段 | 节次 | 时段 |
 |---|---|---|---|
@@ -75,6 +77,16 @@ com.scnu.schedule/
 | 3 | 10:20–11:00 | 8 | 17:00–17:40 |
 | 4 | 11:10–11:50 | 9 | 19:00–19:40 |
 | 5 | 14:30–15:10 | 10 | 19:50–20:30 |
+
+**大学城校区、南海校区**
+
+| 节次 | 时段 | 节次 | 时段 |
+|---|---|---|---|
+| 1 | 8:30–9:10 | 6 | 14:50–15:30 |
+| 2 | 9:20–10:00 | 7 | 15:40–16:20 |
+| 3 | 10:20–11:00 | 8 | 16:30–17:10 |
+| 4 | 11:10–11:50 | 9 | 19:00–19:40 |
+| 5 | 14:00–14:40 | 10 | 19:50–20:30 |
 
 可自由增删节次、修改时段；存为独立 TimeTable，设置页可新建多份。
 
@@ -117,7 +129,7 @@ com.scnu.schedule/
 1. 设置页「教务导入」→ WebView 加载 `jwxt.scnu.edu.cn`（统一身份认证 SSO）
 2. 用户在 WebView 内完成登录（验证码/滑块天然支持）
 3. 登录成功 → CookieManager 共享会话 → 请求正方 `kbcx` 课表接口 → 拿 JSON
-4. `ZhengFangParser` 解析为 Course 列表 → 预览页勾选 → 导入（自动建课程 + 激活石牌作息）
+4. `ZhengFangParser` 解析为 Course 列表 → 预览页勾选 → 导入（自动建课程 + 激活默认作息）
 
 **风险预案**：正方 API 端点 / SSO 流程细节需真机实测；校外校园网限制（需 WebVPN）→ 分态错误提示。
 

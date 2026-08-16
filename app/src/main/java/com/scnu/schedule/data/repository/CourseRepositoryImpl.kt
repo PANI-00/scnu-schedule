@@ -28,4 +28,8 @@ class CourseRepositoryImpl @Inject constructor(
         dao.delete(id)
         WidgetUpdateNotifier.notifyDataChanged(context)
     }
+    override suspend fun clearAll() {
+        dao.clearAll()
+        WidgetUpdateNotifier.notifyDataChanged(context)
+    }
 }

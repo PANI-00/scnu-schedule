@@ -51,7 +51,7 @@ class DaoTest {
 
     @Test fun `timeTable with periods roundtrip`() = runTest {
         val dao = db.timeTableDao()
-        val id = dao.upsertTimetable(TimeTableEntity(name = "石牌", isDefault = true))
+        val id = dao.upsertTimetable(TimeTableEntity(name = "默认", isDefault = true))
         dao.upsertPeriods(listOf(PeriodEntity(timetableId = id, periodIndex = 1, startMinute = 510, endMinute = 550)))
         val all = dao.observeAll().first()
         assertEquals(1, all.size)
