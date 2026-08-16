@@ -24,24 +24,7 @@
 - Jetpack Glance（桌面小组件）
 - minSdk 26 / targetSdk 34
 
-## 构建
 
-```bash
-# 单元测试
-gradle :app:testDebugUnitTest
+## 使用
 
-# 构建 Debug APK
-gradle :app:assembleDebug
-# 产物：app/build/outputs/apk/debug/app-debug.apk
-```
-
-## 项目结构
-
-```
-app/src/main/java/com/scnu/schedule/
-  ui/         主题 / 导航 / 课表 / 今日 / 设置 / 教务导入 / 小组件
-  data/       Room 数据库 / DataStore / 仓储 / 正方教务客户端与解析器 / DI
-  domain/     领域模型与纯逻辑（周次计算、重叠检测、导入解析接口）
-```
-
-`docs/` 下有设计文档与 UI 方案预览（浏览器直接打开 HTML 即可查看）。
+release下载最新apk
