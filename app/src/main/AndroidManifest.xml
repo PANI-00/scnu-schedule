@@ -55,7 +55,7 @@
 
         <receiver
             android:name=".ui.widget.CountdownWidgetReceiver"
-            android:label="@string/widget_name_countdown"
+            android:label=""
             android:exported="false">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
