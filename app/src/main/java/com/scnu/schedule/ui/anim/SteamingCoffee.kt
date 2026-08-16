@@ -41,8 +41,8 @@ fun SteamingCoffee(
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
-            // 0.5x 参考节奏：参考 11s/圈 ÷ 0.5 = 22s/圈
-            animation = tween(durationMillis = 22_000, easing = LinearEasing),
+            // 参考节奏 1x：一圈 11 秒（与浏览器预览的 1x 速度一致；蒸汽每帧约 1.8 秒跳一格）
+            animation = tween(durationMillis = 11_000, easing = LinearEasing),
             repeatMode = RepeatMode.Restart,
         ),
         label = "coffeePhase",
