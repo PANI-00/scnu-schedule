@@ -60,8 +60,8 @@
     <div class="controls">
       <button id="btnPlay" onclick="toggle()">暂停</button>
       <button class="spd" data-m="0.3" onclick="speed(this.dataset.m)">0.3x</button>
-      <button class="spd" data-m="0.5" onclick="speed(this.dataset.m)">0.5x</button>
-      <button class="spd active" data-m="1" onclick="speed(this.dataset.m)">1x</button>
+      <button class="spd active" data-m="0.5" onclick="speed(this.dataset.m)">0.5x</button>
+      <button class="spd" data-m="1" onclick="speed(this.dataset.m)">1x</button>
       <button class="spd" data-m="2" onclick="speed(this.dataset.m)">2x</button>
       <label>相位 <input type="range" id="phaseSlider" min="0" max="100" value="0" oninput="seek(this.value)"><span class="frameinfo" id="phaseInfo">0.00</span></label>
     </div>
@@ -120,7 +120,7 @@
   }
 
   // ---------- 播放控制 ----------
-  var phase = 0, playing = true, step = 0.0015;        // 默认节奏 = 参考 PixelCup（0.0015/帧）
+  var phase = 0, playing = true, step = 0.0015 * 0.5;   // 默认 0.5x（参考节奏 0.0015/帧）
   var mainWrap = document.getElementById('mainWrap');
   var slider = document.getElementById('phaseSlider');
   var phaseInfo = document.getElementById('phaseInfo');

@@ -60,7 +60,7 @@ fun TodayScreen(vm: TodayViewModel = hiltViewModel()) {
             }
         }
         if (state.todayCourses.isEmpty()) {
-            // 没课空态：冒烟咖啡杯像素动画（连续相位，约 11 秒一圈）
+            // 没课空态：冒烟咖啡杯像素动画（连续相位，0.5x 速度约 22 秒一圈；有课时本分支不组合，不影响课程展示）
             Column(
                 Modifier.fillMaxWidth().padding(top = 36.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
