@@ -13,12 +13,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.scnu.schedule.domain.model.Period
+import com.scnu.schedule.ui.anim.SteamingCoffee
 import com.scnu.schedule.ui.theme.LocalAppPalette
 import java.time.format.DateTimeFormatter
 
@@ -58,7 +60,14 @@ fun TodayScreen(vm: TodayViewModel = hiltViewModel()) {
             }
         }
         if (state.todayCourses.isEmpty()) {
-            Text("今天没有课", fontSize = 14.sp, color = p.muted, modifier = Modifier.padding(top = 24.dp))
+            // 没课空态：冒烟咖啡杯像素动画（连续相位，约 11 秒一圈）
+            Column(
+                Modifier.fillMaxWidth().padding(top = 36.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                SteamingCoffee(canvasSize = 120.dp)
+                Text("今天没课，喝杯咖啡吧", fontSize = 13.sp, color = p.muted, modifier = Modifier.padding(top = 14.dp))
+            }
         }
     }
 }

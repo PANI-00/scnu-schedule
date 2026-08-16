@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>scnu课程表 · 没课像素动画预览（16 帧）</title>
+<title>scnu课程表 · 没课像素动画预览（冒烟咖啡杯 v2）</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#E8E6E1;color:#26241f;padding:28px 20px 60px}
   .proto-badge{display:inline-block;background:#26241f;color:#fff;font-size:11px;padding:3px 10px;border-radius:999px;letter-spacing:.5px}
   h1{font-size:22px;margin:10px 0 4px}
-  .sub{font-size:13px;color:#6f6b63;margin-bottom:20px;line-height:1.6;max-width:900px}
+  .sub{font-size:13px;color:#6f6b63;margin-bottom:20px;line-height:1.7;max-width:920px}
+  .sub code{background:#eee;padding:1px 6px;border-radius:4px;font-size:12px}
 
   .tbtnrow{display:flex;gap:8px;margin-bottom:16px}
   .tbtn{border:1px solid #bbb;background:#fff;color:#333;padding:7px 16px;border-radius:10px;cursor:pointer;font-size:13px}
@@ -18,27 +19,33 @@
   .stage{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start}
   .player{background:#fff;border-radius:16px;padding:20px;box-shadow:0 8px 24px rgba(0,0,0,.08)}
   .player h2{font-size:15px;margin-bottom:12px}
-  canvas#main{border-radius:12px;display:block;image-rendering:pixelated}
-  .controls{display:flex;gap:10px;align-items:center;margin-top:12px}
+  #mainWrap{
+    width:240px;height:224px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+    background:var(--wbg,#faf9f5);border:1px solid var(--whair,#e6dfd8);
+  }
+  #mainWrap svg{image-rendering:pixelated;user-select:none}
+  .controls{display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap}
   .controls button{border:1px solid #bbb;background:#fff;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:13px}
-  .controls label{font-size:12px;color:#666}
-  .controls input[type=range]{width:120px}
-  .frameinfo{font-size:12px;color:#888;margin-left:4px}
+  .controls label{font-size:12px;color:#666;display:flex;align-items:center;gap:6px}
+  .controls input[type=range]{width:110px}
+  .frameinfo{font-size:12px;color:#888}
+  .hint{font-size:11px;color:#aaa;margin-top:8px}
 
   .frames{background:#fff;border-radius:16px;padding:20px;box-shadow:0 8px 24px rgba(0,0,0,.08)}
   .frames h2{font-size:15px;margin-bottom:12px}
-  .grid{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px;max-width:560px}
-  .grid canvas{width:100%;border:1px solid #eee;border-radius:4px;image-rendering:pixelated;display:block}
-  .grid div{font-size:9px;color:#aaa;text-align:center;margin-top:2px}
+  .grid{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px;max-width:600px}
+  .cell{background:#faf9f5;border:1px solid #eee;border-radius:8px;padding:6px;text-align:center}
+  .cell svg{width:100%;height:auto;image-rendering:pixelated;display:block}
+  .cell div{font-size:9px;color:#aaa;margin-top:4px}
 
-  .note{max-width:900px;font-size:12px;color:#6f6b63;line-height:1.7;margin-top:24px}
+  .note{max-width:920px;font-size:12px;color:#6f6b63;line-height:1.7;margin-top:24px}
 </style>
 </head>
 <body data-theme="cream">
 
-<span class="proto-badge">PROTOTYPE · 原型预览</span>
-<h1>没课像素动画 · 冒烟咖啡杯（16 帧循环）</h1>
-<div class="sub">给桌面小组件空态设计的 16 帧像素动画：没课的时候，小组件里显示一杯冒着热气的咖啡。像素画 16x16 网格，可播放/暂停、调速度、单帧查看；背景随三套主题切换。</div>
+<span class="proto-badge">PROTOTYPE · 原型预览 v2</span>
+<h1>没课像素动画 · 冒烟咖啡杯（连续相位版）</h1>
+<div class="sub">完全套用 <code>word-formatter-ui</code> 的 <code>PixelCup</code>：蒸汽算法 <code>steam(p, 4, 10, 5, 4)</code>（一束四像素斜排、相位错开、透明度渐隐 + 尾迹）、节奏 <code>0.0015/帧</code>、杯子结构（珊瑚把手、奶油杯身、墨色描边、咖啡液面、托盘）全部照搬，仅配色随三套主题。16 帧序列按相位采样展示。</div>
 
 <div class="tbtnrow">
   <button class="tbtn active" id="tb-cream" onclick="setTheme('cream')">奶油珊瑚</button>
@@ -49,130 +56,120 @@
 <div class="stage">
   <div class="player">
     <h2>动画播放</h2>
-    <canvas id="main" width="320" height="320"></canvas>
+    <div id="mainWrap"></div>
     <div class="controls">
       <button id="btnPlay" onclick="toggle()">暂停</button>
-      <button onclick="speed(1)">快</button>
-      <button onclick="speed(0.5)">慢</button>
-      <label>帧 <input type="range" id="frameSlider" min="0" max="15" value="0" oninput="seek(this.value)"><span class="frameinfo" id="frameInfo">0/15</span></label>
+      <button class="spd" data-m="0.3" onclick="speed(this.dataset.m)">0.3x</button>
+      <button class="spd" data-m="0.5" onclick="speed(this.dataset.m)">0.5x</button>
+      <button class="spd active" data-m="1" onclick="speed(this.dataset.m)">1x</button>
+      <button class="spd" data-m="2" onclick="speed(this.dataset.m)">2x</button>
+      <label>相位 <input type="range" id="phaseSlider" min="0" max="100" value="0" oninput="seek(this.value)"><span class="frameinfo" id="phaseInfo">0.00</span></label>
     </div>
+    <div class="hint">节奏与参考 PixelCup 一致（相位每帧 +0.0015，一圈约 11 秒）；可调速</div>
   </div>
   <div class="frames">
-    <h2>16 帧序列</h2>
+    <h2>16 帧序列（相位 0/16 .. 15/16）</h2>
     <div class="grid" id="frameGrid"></div>
   </div>
 </div>
 
 <div class="note">
-  选定后落地到 App：小组件（Glance）与 App 空态页都可以复用这组像素帧（生成 16 帧位图数组或 drawable）。帧率建议 8fps（125ms/帧）。需要调整冒烟速度、咖啡杯配色或换成别的图形（书本、月亮、小太阳等）随时说。
+  落地到 App 时可按同样方式实现：Glance 侧用静态 PNG 序列（16 帧位图按相位切换），App 内空态页可用自定义绘制（Canvas 连续相位）或 Lottie。帧率建议 8fps 序列 / 60fps 连续相位。配色与三套主题 token 对齐。
 </div>
 
 <script>
+  // ---------- 三套主题像素配色 ----------
   var THEMES = {
-    cream:  {bg:['#FAF9F5','#F0E8DC'], smoke:'#C9BEB0'},
-    night:  {bg:['#201D1D','#262326'], smoke:'#4E4C49'},
-    paper:  {bg:['#F0E8D6','#E4D8BC'], smoke:'#B9AC93'}
+    cream: { cup:'#f5f0e8', handle:'#cc785c', ink:'#141413', liquid:'#8b5e3c', saucer:'#d4c4a8', steam:'#8e8b82', wbg:'#faf9f5', whair:'#e6dfd8' },
+    night: { cup:'#302c2c', handle:'#30d158', ink:'#fdfcfc', liquid:'#b9b7b2', saucer:'#3a3a38', steam:'#5c5a56', wbg:'#201d1d', whair:'#3a3a38' },
+    paper: { cup:'#fbf6ea', handle:'#a8432f', ink:'#262019', liquid:'#6e5038', saucer:'#d4c7a8', steam:'#b9ac93', wbg:'#f0e8d6', whair:'#d4c7a8' }
   };
 
-  // ---------- 16x16 像素画：咖啡杯 + 冒烟（16 帧） ----------
-  // 颜色
-  var C = { body:'#8B5A3C', bodyHi:'#A57250', rim:'#6B4228', liquid:'#6B3F24', handle:'#7A4E33' };
+  function theme(){ return THEMES[document.body.dataset.theme]; }
 
-  function isCup(x, y){
-    // 杯身 (4..11, 8..13)，杯口 (3..12, 7)，液体 (5..10, 8)，杯把右侧 (12..13, 10..11)
-    if (y === 7 && x >= 3 && x <= 12) return 'rim';
-    if (y === 8 && x >= 5 && x <= 10) return 'liquid';
-    if (y >= 8 && y <= 13 && x >= 4 && x <= 11) return y === 8 ? 'bodyHi' : 'body';
-    if (y >= 10 && y <= 11 && x >= 12 && x <= 13) return 'handle';
-    return null;
-  }
-
-  // 烟粒子：phase 0..15（从杯口升到顶消散）
-  function smokePixel(phase, x){
-    // 两股烟，错开 8 帧
-    var p1 = phase;
-    var p2 = (phase + 8) % 16;
-    function one(p, baseX){
-      if (p === 0) return null;         // 帧0 在杯口内（未冒出）
-      var y = 7 - Math.floor(p * 6 / 15); // 7 -> 1
-      var wob = Math.round(Math.sin(p * 0.5) * 0.6);
-      var px = baseX + wob;
-      if (x === px && y >= 1 && y <= 6) return p >= 13 ? 0.25 : (p >= 9 ? 0.5 : 0.85); // 越往上越淡
-      return null;
-    }
-    var a1 = one(p1, 6), a2 = one(p2, 9);
-    return a1 || a2 || null;
-  }
-
-  function drawFrame(ctx, f, scale, theme){
-    ctx.fillStyle = THEMES[theme].bg[0];
-    ctx.fillRect(0, 0, 16*scale, 16*scale);
-    // 底部淡色渐变带
-    ctx.fillStyle = THEMES[theme].bg[1];
-    ctx.fillRect(0, 14*scale, 16*scale, 2*scale);
-    for (var y = 0; y < 16; y++){
-      for (var x = 0; x < 16; x++){
-        var cup = isCup(x, y);
-        if (cup){
-          ctx.fillStyle = C[cup];
-          ctx.fillRect(x*scale, y*scale, scale, scale);
-          continue;
-        }
-        var a = smokePixel(f, x);
-        if (a){
-          ctx.globalAlpha = a;
-          ctx.fillStyle = THEMES[theme].smoke;
-          ctx.fillRect(x*scale, y*scale, scale, scale);
-          ctx.globalAlpha = 1;
-        }
+  // ---------- 蒸汽：完全照搬参考 PixelCup（steam(p, 4, 10, 5, 4)） ----------
+  // 一束烟：4 个像素从 x=4 到 x=10 斜向排列，每像素相位错开 i/4，
+  // y 从 5 向上每次减 1（共 6 步），透明度 (1-ph)*0.6 渐隐；ph<0.7 时在 (x+1, y-1) 补 30% 尾迹
+  function steamSvg(p, c){
+    var s = '';
+    var x1 = 4, x2 = 10, y0 = 5, w = 4;
+    for (var i = 0; i < w; i++){
+      var ph = (p + i / w) % 1;
+      var y = y0 - Math.floor(ph * 6);
+      var op = Math.max(0, (1 - ph) * 0.6);
+      var x = x1 + i * ((x2 - x1) / (w - 1 || 1));
+      s += '<rect x="' + x + '" y="' + y + '" width="1" height="1" fill="' + c.steam + '" opacity="' + op.toFixed(2) + '"/>';
+      if (ph < 0.7){
+        s += '<rect x="' + (x + 1) + '" y="' + (y - 1) + '" width="1" height="1" fill="' + c.steam + '" opacity="' + (op * 0.3).toFixed(2) + '"/>';
       }
     }
+    return s;
   }
 
-  var main = document.getElementById('main');
-  var mctx = main.getContext('2d');
-  var slider = document.getElementById('frameSlider');
-  var frameInfo = document.getElementById('frameInfo');
+  // ---------- 杯子 ----------
+  function cupSvg(p, c){
+    return '<svg viewBox="0 0 15 14" width="220" height="205" style="image-rendering:pixelated">' +
+      steamSvg(p, c) +
+      '<path d="M10.5,10 L10.5,9 L11.5,9 Q12.5,9 12.5,10 L12.5,11 Q12.5,12 11.5,12 L10.5,12 L10.5,11" fill="none" stroke="' + c.handle + '" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '<rect x="3" y="7" width="8" height="6" fill="' + c.cup + '" rx="1"/>' +
+      '<rect x="3" y="7" width="8" height="6" rx="1" fill="none" stroke="' + c.ink + '" stroke-width="0.3"/>' +
+      '<rect x="4" y="8" width="6" height="1" fill="' + c.liquid + '" rx="1"/>' +
+      '<rect x="2" y="13" width="10" height="1" fill="' + c.saucer + '" rx="1"/>' +
+      '<rect x="2" y="13" width="10" height="1" rx="1" fill="none" stroke="' + c.ink + '" stroke-width="0.3"/>' +
+      '</svg>';
+  }
 
-  var frame = 0, playing = true, rate = 125;
-  var timer = setInterval(tick, rate);
+  // ---------- 播放控制 ----------
+  var phase = 0, playing = true, step = 0.0015;        // 默认节奏 = 参考 PixelCup（0.0015/帧）
+  var mainWrap = document.getElementById('mainWrap');
+  var slider = document.getElementById('phaseSlider');
+  var phaseInfo = document.getElementById('phaseInfo');
 
-  function tick(){
-    if (!playing) return;
-    frame = (frame + 1) % 16;
+  function frame(){
+    if (playing) phase = (phase + step) % 1;
     render();
+    requestAnimationFrame(frame);
   }
   function render(){
-    drawFrame(mctx, frame, 20, document.body.dataset.theme);
-    slider.value = frame;
-    frameInfo.textContent = frame + '/15';
+    var c = theme();
+    mainWrap.innerHTML = cupSvg(phase, c);
+    mainWrap.style.background = c.wbg;
+    mainWrap.style.borderColor = c.whair;
+    slider.value = Math.round(phase * 100);
+    phaseInfo.textContent = phase.toFixed(2);
     paintGrid();
   }
   function toggle(){
     playing = !playing;
     document.getElementById('btnPlay').textContent = playing ? '暂停' : '播放';
   }
-  function speed(m){ clearInterval(timer); timer = setInterval(tick, Math.round(rate * m)); }
-  function seek(v){ frame = parseInt(v); render(); }
+  function speed(m){
+    step = 0.0015 * parseFloat(m);
+    document.querySelectorAll('.spd').forEach(function(b){ b.classList.toggle('active', b.dataset.m === m); });
+  }
+  function seek(v){ phase = v / 100; render(); }
 
-  // 16 帧平铺
+  // ---------- 16 帧序列 ----------
   var grid = document.getElementById('frameGrid');
-  var cvs = [];
+  var cells = [];
   for (var i = 0; i < 16; i++){
     var cell = document.createElement('div');
-    var cv = document.createElement('canvas');
-    cv.width = 48; cv.height = 48;
-    cell.appendChild(cv);
-    var lab = document.createElement('div');
-    lab.textContent = i;
-    cell.appendChild(lab);
+    cell.className = 'cell';
+    cell.innerHTML = '<svg viewBox="0 0 15 14" style="image-rendering:pixelated"></svg><div>' + i + '</div>';
     grid.appendChild(cell);
-    cvs.push(cv);
+    cells.push(cell.querySelector('svg'));
   }
   function paintGrid(){
+    var c = theme();
     for (var i = 0; i < 16; i++){
-      var c = cvs[i].getContext('2d');
-      drawFrame(c, i, 3, document.body.dataset.theme);
+      cells[i].innerHTML =
+        steamSvg(i / 16, c) +
+        '<path d="M10.5,10 L10.5,9 L11.5,9 Q12.5,9 12.5,10 L12.5,11 Q12.5,12 11.5,12 L10.5,12 L10.5,11" fill="none" stroke="' + c.handle + '" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>' +
+        '<rect x="3" y="7" width="8" height="6" fill="' + c.cup + '" rx="1"/>' +
+        '<rect x="3" y="7" width="8" height="6" rx="1" fill="none" stroke="' + c.ink + '" stroke-width="0.3"/>' +
+        '<rect x="4" y="8" width="6" height="1" fill="' + c.liquid + '" rx="1"/>' +
+        '<rect x="2" y="13" width="10" height="1" fill="' + c.saucer + '" rx="1"/>' +
+        '<rect x="2" y="13" width="10" height="1" rx="1" fill="none" stroke="' + c.ink + '" stroke-width="0.3"/>';
     }
   }
 
@@ -182,7 +179,7 @@
     render();
   }
 
-  render();
+  requestAnimationFrame(frame);
 </script>
 </body>
 </html>
