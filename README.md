@@ -1,6 +1,22 @@
-# scnu课程表
+<p align="center">
+  <img src="docs/images/scnu-schedule-icon.png" width="96" alt="SCNU Schedule 应用图标">
+</p>
 
-面向华南师范大学学生的 Android 课程表应用：教务系统一键导课、周课表 / 今日视图、桌面小组件，三套可切换主题。
+<p align="center">
+  <img src="docs/images/scnu-schedule-wordmark.png" width="280" alt="SCNU Schedule">
+</p>
+
+<p align="center">
+  面向华南师范大学学生的 Android 课程表应用
+</p>
+
+<p align="center">
+  教务一键导课 · 周课表 / 今日视图 · 桌面小组件 · 三套可切换主题
+</p>
+
+<p align="center">
+  <a href="https://github.com/PANI-00/scnu-schedule/releases/latest">Release 下载最新 APK</a>
+</p>
 
 ## 功能
 
@@ -12,7 +28,7 @@
   - 下一节课 2x1（课程名 + 地点 + 倒计时）
   - 今日课程 4x2（今日课程列表）
   - 周课表 4x3（迷你周网格，含单双周过滤）
-  - 下一节倒计时 2x2（精致卡片：日期周次 + 课程 + 地点 + 倒计时）
+  - 下一节倒计时 2x2（日期周次 + 课程 + 地点 + 倒计时）
 - 三套主题：奶油珊瑚、午夜机房、老报刊亭，即时切换，小组件同步换肤
 
 ## 技术栈
@@ -23,8 +39,3 @@
 - OkHttp + WebView（教务抓取，复用登录会话）
 - Jetpack Glance（桌面小组件）
 - minSdk 26 / targetSdk 34
-
-
-## 使用
-
-release下载最新apk
