@@ -11,10 +11,18 @@ import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
+import androidx.glance.layout.Alignment
 import androidx.glance.layout.Column
+
+
 import androidx.glance.layout.Row
+import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
+
 import androidx.glance.layout.fillMaxWidth
+import androidx.glance.layout.height
+
+
 import androidx.glance.layout.padding
 import androidx.glance.layout.width
 import androidx.glance.text.FontWeight
@@ -44,7 +52,7 @@ class TodayWidget : GlanceAppWidget() {
                 ),
             )
         } ?: TodayWidgetModel("", emptyList())
-        provideContent { TodayContent(model, palette) }
+        provideContent { TodayContentB(model, palette) }
     }
 }
 
@@ -53,12 +61,12 @@ fun TodayContent(model: TodayWidgetModel, palette: AppPalette) {
     Column(
         GlanceModifier.fillMaxSize()
             .background(ColorProvider(palette.canvas))
-            .padding(8.dp)
+            .padding(6.dp)
             .clickable(actionStartActivity<MainActivity>()),
     ) {
         Text(
             "今日 · ${model.dateLabel}",
-            style = TextStyle(color = ColorProvider(palette.muted), fontSize = 11.sp),
+            style = TextStyle(color = ColorProvider(palette.muted), fontSize = 10.sp),
         )
         if (model.entries.isEmpty()) {
             Text(
@@ -68,16 +76,16 @@ fun TodayContent(model: TodayWidgetModel, palette: AppPalette) {
             )
         } else {
             model.entries.take(4).forEach { e ->
-                Row(GlanceModifier.fillMaxWidth().padding(top = 3.dp)) {
+                Row(GlanceModifier.fillMaxWidth().height(22.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         WidgetFormatter.hhmm(e.startMinute),
-                        style = TextStyle(color = ColorProvider(palette.primary), fontSize = 11.sp, fontWeight = FontWeight.Bold),
+                        style = TextStyle(color = ColorProvider(palette.primary), fontSize = 10.sp),
                         modifier = GlanceModifier.width(36.dp),
                     )
                     Text(
                         "${e.name} · ${e.location}",
                         maxLines = 1,
-                        style = TextStyle(color = ColorProvider(palette.ink), fontSize = 12.sp),
+                        style = TextStyle(color = ColorProvider(palette.ink), fontSize = 11.sp),
                         modifier = GlanceModifier.fillMaxWidth(),
                     )
                 }
@@ -85,3 +93,69 @@ fun TodayContent(model: TodayWidgetModel, palette: AppPalette) {
         }
     }
 }
+
+@Composable
+private fun TodayContentB(model: TodayWidgetModel, palette: AppPalette) {
+    Column(
+        GlanceModifier.fillMaxSize()
+            .background(ColorProvider(palette.canvas))
+            .padding(6.dp)
+            .clickable(actionStartActivity<MainActivity>()),
+    ) {
+        Row(GlanceModifier.fillMaxSize()) {
+            Column(
+                GlanceModifier.width(54.dp).fillMaxHeight().padding(end = 8.dp),
+            ) {
+                Text(
+                    "今日",
+                    style = TextStyle(color = ColorProvider(palette.ink), fontSize = 16.sp, fontWeight = FontWeight.Bold),
+                )
+                Text(
+                    model.dateLabel,
+                      style = TextStyle(color = ColorProvider(palette.muted), fontSize = 10.sp),
+                )
+                Text(
+                    "${model.entries.size} 节课程",
+                    style = TextStyle(color = ColorProvider(palette.primary), fontSize = 10.sp, fontWeight = FontWeight.Bold),
+                    modifier = GlanceModifier.padding(top = 4.dp),
+                )
+            }
+            Column(GlanceModifier.fillMaxWidth().fillMaxHeight().padding(start = 4.dp)) {
+                Text(
+                    "课程安排",
+                    style = TextStyle(color = ColorProvider(palette.muted), fontSize = 11.sp, fontWeight = FontWeight.Bold),
+                    modifier = GlanceModifier.padding(bottom = 3.dp),
+                )
+                if (model.entries.isEmpty()) {
+                    Text(
+                        "今天没有课",
+                        style = TextStyle(color = ColorProvider(palette.muted), fontSize = 12.sp),
+                    )
+                } else {
+                    model.entries.take(4).forEach { entry ->
+                        Row(
+                            GlanceModifier.fillMaxWidth()
+                                .height(26.dp)
+                                .background(ColorProvider(palette.surfaceSoft))
+                                .padding(horizontal = 5.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                WidgetFormatter.hhmm(entry.startMinute),
+                                style = TextStyle(color = ColorProvider(palette.primary), fontSize = 11.sp, fontWeight = FontWeight.Bold),
+                                modifier = GlanceModifier.width(40.dp),
+                            )
+                            Text(
+                                "${entry.name} · ${entry.location}",
+                                maxLines = 1,
+                                style = TextStyle(color = ColorProvider(palette.ink), fontSize = 12.sp),
+                                modifier = GlanceModifier.fillMaxWidth(),
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+

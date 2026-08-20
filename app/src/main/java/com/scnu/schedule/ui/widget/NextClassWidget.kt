@@ -12,7 +12,9 @@ import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
+import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
+
 import androidx.glance.layout.Column
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.padding
@@ -26,7 +28,8 @@ import com.scnu.schedule.ui.theme.AppThemeType
 import com.scnu.schedule.ui.theme.paletteFor
 import java.time.LocalDateTime
 
-/** 下一节课 2×1：课程名 + 地点 + 开始时间/倒计时；空态显示「暂无课程」。 */
+/** 下一节课 2×1：课程名 + 地点 + 固定开始时间；空态显示「暂无课程」。 */
+
 class NextClassWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val data = WidgetDataReader.load(context)
@@ -48,7 +51,7 @@ fun NextClassContent(model: NextClassModel?, palette: AppPalette) {
     Box(
         GlanceModifier.fillMaxSize()
             .background(ColorProvider(palette.canvas))
-            .padding(12.dp)
+            .padding(9.dp)
             .cornerRadius(if (palette.isDark) 0.dp else 12.dp)
             .clickable(actionStartActivity<MainActivity>()),
     ) {
@@ -58,20 +61,20 @@ fun NextClassContent(model: NextClassModel?, palette: AppPalette) {
                 style = TextStyle(color = ColorProvider(palette.muted), fontSize = 13.sp),
             )
         } else {
-            Column(GlanceModifier.fillMaxSize()) {
+            Column(GlanceModifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     model.name,
                     maxLines = 1,
-                    style = TextStyle(color = ColorProvider(palette.ink), fontSize = 20.sp, fontWeight = FontWeight.Bold),
+                    style = TextStyle(color = ColorProvider(palette.ink), fontSize = 16.sp, fontWeight = FontWeight.Bold),
                 )
                 Text(
-                    "${model.location} · ${WidgetFormatter.hhmm(model.startMinute)} 开始",
+                    model.location.ifBlank { "未填写地点" },
                     maxLines = 1,
-                    style = TextStyle(color = ColorProvider(palette.muted), fontSize = 12.sp),
+                    style = TextStyle(color = ColorProvider(palette.muted), fontSize = 10.sp),
                     modifier = GlanceModifier.padding(top = 4.dp),
                 )
                 Text(
-                    WidgetFormatter.countdownText(model.minutesUntil),
+                    "${WidgetFormatter.hhmm(model.startMinute)} 开始上课",
                     style = TextStyle(color = ColorProvider(palette.primary), fontSize = 13.sp),
                     modifier = GlanceModifier.padding(top = 4.dp),
                 )

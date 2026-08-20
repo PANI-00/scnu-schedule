@@ -14,7 +14,9 @@ import java.time.LocalDateTime
 object WidgetFormatter {
     private val dayLabels = listOf("一", "二", "三", "四", "五", "六", "日")
 
-    /** 最近一节未开始的课（今天内）；没有返回 null */
+    /**
+     * 返回今天内「下一节尚未开始的课」；如果当前正在上课，也返回这节课的下一节。没有则返回 null。
+     */
     fun nextClass(
         courses: List<Course>,
         periods: List<Period>,

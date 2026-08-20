@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -79,7 +79,7 @@ fun CourseBlock(course: Course, color: Color, rowHeight: Int, onClick: () -> Uni
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 1.dp)
-            .heightIn(min = (rowHeight * span).dp)
+            .height((rowHeight * span).dp)
             .drawBehind {
                 // 硬阴影：整体向右下偏移，露出 L 形边（size 取全尺寸，向右下越界绘制；
                 // 若减去偏移则会被背景完全盖住）

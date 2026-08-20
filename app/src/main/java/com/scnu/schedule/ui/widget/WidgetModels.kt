@@ -30,3 +30,18 @@ data class DayColumn(val label: String, val courses: List<CourseCell>)
 
 /** 周课表 4×3 渲染模型 */
 data class WeekGridModel(val days: List<DayColumn>)
+
+
+/** 与软件内课表网格对应的周课表小组件数据。 */
+data class WeekWidgetModel(
+    val week: Int,
+    val dayLabels: List<String>,
+    val dayDates: List<String>,
+    val periodLabels: List<String>,
+    val cells: List<List<WeekSlot?>>,
+)
+
+data class WeekSlot(
+    val name: String,
+    val colorIndex: Int,
+)

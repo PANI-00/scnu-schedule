@@ -21,6 +21,7 @@ captures/
 *.jar
 *.war
 *.ear
+!gradle/wrapper/gradle-wrapper.jar
 output.json
 
 # Kotlin

@@ -1,7 +1,7 @@
 package com.scnu.schedule.ui.widget
 
 import android.content.Context
-import android.content.Intent
+
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -14,7 +14,7 @@ object WidgetUpdateNotifier {
 
     /** 课程/作息/学期/主题变更后调用；无组件实例时广播是空操作，安全。 */
     fun notifyDataChanged(context: Context) {
-        context.sendBroadcast(Intent(ACTION_REFRESH).setPackage(context.packageName))
+        updateAllNow(context.applicationContext)
     }
 
     /** 刷新所有已放置的组件实例（在协程里逐个 update）。 */

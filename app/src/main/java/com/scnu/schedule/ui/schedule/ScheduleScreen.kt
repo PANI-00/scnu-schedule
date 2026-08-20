@@ -28,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -188,7 +189,8 @@ private fun WeeklyGrid(state: ScheduleUiState, week: Int, onEmptyClick: (Int) ->
                 val day = index + 1
                 val dayCourses = WeekCalculator.coursesForWeek(state.courses.filter { it.dayOfWeek == day }, week)
                 dayCourses.forEachIndexed { i, course ->
-                    val color = p.coursePalette[course.colorIndex % p.coursePalette.size]
+                    key("${course.id}:${course.name}:${course.dayOfWeek}:${course.startPeriod}:${course.endPeriod}") {
+                          val color = p.coursePalette[course.colorIndex % p.coursePalette.size]
                     AnimatedCourseBlock(
                         course = course,
                         color = color,
@@ -199,6 +201,7 @@ private fun WeeklyGrid(state: ScheduleUiState, week: Int, onEmptyClick: (Int) ->
                         staggerMs = (index * 2 + i) * 40,
                         onClick = { onCourseClick(course) },
                     )
+                      }
                 }
             }
         }
@@ -218,7 +221,7 @@ private fun AnimatedCourseBlock(
     onClick: () -> Unit,
 ) {
     var appear by remember(course.id) { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
+    LaunchedEffect(course.id, course.startPeriod, course.endPeriod, course.name) {
         delay(staggerMs.toLong())
         appear = true
     }

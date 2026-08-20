@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- 2×2 倒计时小组件：每分钟实时刷新所需的精确闹钟权限（Android 12+ 可在系统设置里授予/回收） -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <application
         android:name=".ScheduleApp"
         android:label="@string/app_name"
@@ -43,6 +45,7 @@
 
         <receiver
             android:name=".ui.widget.WeekWidgetReceiver"
+            android:enabled="false"
             android:label="@string/widget_name_week"
             android:exported="false">
             <intent-filter>
@@ -72,5 +75,10 @@
                 <action android:name="com.scnu.schedule.action.WIDGET_REFRESH" />
             </intent-filter>
         </receiver>
+
+        <!-- 每分钟触发倒计时小组件刷新的闹钟接收器 -->
+        <receiver
+            android:name=".ui.widget.CountdownTickReceiver"
+            android:exported="false" />
     </application>
 </manifest>
