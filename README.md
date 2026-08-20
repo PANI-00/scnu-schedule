@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/images/scnu-schedule-icon.png" width="128" alt="SCNU Schedule 应用图标">&nbsp;&nbsp;<img src="docs/images/scnu-schedule-wordmark.png" width="360" alt="SCNU Schedule">
+  <img src="docs/images/scnu-schedule-icon.png" width="128" alt="SCNU Schedule 应用图标" style="vertical-align: middle;">&nbsp;&nbsp;<img src="docs/images/scnu-schedule-wordmark.png" width="360" alt="SCNU Schedule" style="vertical-align: middle;">
 </p>
 
 <p align="center">
