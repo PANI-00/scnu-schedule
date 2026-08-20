@@ -1,7 +1,6 @@
-<div align="center">
-  <img src="docs/images/scnu-schedule-icon.png" width="144" alt="SCNU Schedule 应用图标"><br>
-  <img src="docs/images/scnu-schedule-wordmark.png" width="420" alt="SCNU Schedule">
-</div>
+<p align="center">
+  <img src="docs/images/scnu-schedule-icon.png" width="128" alt="SCNU Schedule 应用图标">&nbsp;&nbsp;<img src="docs/images/scnu-schedule-wordmark.png" width="360" alt="SCNU Schedule">
+</p>
 
 <p align="center">
   面向华南师范大学学生的 Android 课程表应用
