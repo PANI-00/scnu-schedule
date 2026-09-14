@@ -1,5 +1,9 @@
 package com.scnu.schedule.ui.schedule
 
+import android.content.pm.ApplicationInfo
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -35,8 +40,12 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -48,6 +57,7 @@ import com.scnu.schedule.ui.anim.FrameStatsChip
 import com.scnu.schedule.ui.theme.LocalAppPalette
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private val dateFormatter = DateTimeFormatter.ofPattern("MM/dd")
@@ -66,6 +76,11 @@ fun ScheduleScreen(vm: ScheduleViewModel = hiltViewModel()) {
     var showJump by remember { mutableStateOf(false) }
     var editing by remember { mutableStateOf<Course?>(null) }
     var creatingDay by remember { mutableStateOf<Int?>(null) }
+    // 帧率指示器只在可调试构建出现：release 包不显示
+    val appContext = LocalContext.current
+    val isDebuggable = remember(appContext) {
+        (appContext.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+    }
 
     Column(Modifier.fillMaxSize()) {
         // 顶栏：周标题 + 左右箭头（紧凑高度）
@@ -80,7 +95,7 @@ fun ScheduleScreen(vm: ScheduleViewModel = hiltViewModel()) {
                 scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
             })
             Spacer(Modifier.width(8.dp))
-            FrameStatsChip()
+            if (isDebuggable) FrameStatsChip()
         }
 
         HorizontalPager(state = pagerState, beyondViewportPageCount = 1) { page ->
@@ -149,8 +164,13 @@ private fun WeeklyGrid(state: ScheduleUiState, week: Int, onEmptyClick: (Int) ->
                 }
             }
         }
-        // 课程格子区域：不再使用 BoxWithConstraints（SubcomposeLayout 每页都会跑一次子组合），
-        // 星期列用 weight(1f) 自适应宽度，课程块直接落在所属列内，无需再算列宽与 x 偏移。
+        // 课程格子区域：不再使用 BoxWithConstraints（SubcomposeLayout 每页都会跑一次子组合）。
+        // 层级很关键：整片空格格作为**底层一次绘制**，课程块放进上层的透明星期列。
+        // 若把格子画在各自列里，右边一列的格子会盖住左边列课程块的硬阴影，
+        // 阴影只在格子间的 1dp 缝隙露出，看起来就是一排突起（老报刊亭主题尤其明显）。
+        val periodCount = state.timetable?.periods?.size ?: 0
+        val gridHeight = (rowHeight * periodCount).dp
+        val cellRadius = if (p.isDark) 2.dp else 8.dp
         Row(Modifier.fillMaxWidth().padding(top = 6.dp)) {
             Column(Modifier.width(40.dp)) {
                 state.timetable?.periods?.forEach { period ->
@@ -175,50 +195,95 @@ private fun WeeklyGrid(state: ScheduleUiState, week: Int, onEmptyClick: (Int) ->
                     }
                 }
             }
-            val periodCount = state.timetable?.periods?.size ?: 0
-            val cellRadius = if (p.isDark) 2.dp else 8.dp
-            weekdays.forEachIndexed { index, _ ->
-                val day = index + 1
-                Box(Modifier.weight(1f).height((rowHeight * periodCount).dp)) {
-                    // 空格格：一次绘制 + 一个手势处理器，代替 50 个可点击 Box
-                    // （每页组合节点大幅减少；代价是空格格按下不再有涟漪反馈）
-                    Box(
-                        Modifier
-                            .fillMaxSize()
-                            .drawBehind {
-                                val cellH = rowHeight.dp.toPx()
-                                val gap = 1.dp.toPx()
-                                val r = cellRadius.toPx()
+            Box(Modifier.weight(1f).height(gridHeight)) {
+                // 底层：5 列 × N 节的空格格，一次绘制 + 一个手势处理器
+                // （代替 50 个可点击 Box，大幅减少组合节点；代价：空格格按下无涟漪反馈）
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .drawBehind {
+                            val cellH = rowHeight.dp.toPx()
+                            val gap = 1.dp.toPx()
+                            val r = cellRadius.toPx()
+                            val colW = size.width / weekdays.size
+                            for (col in weekdays.indices) {
+                                val x = col * colW
                                 repeat(periodCount) { i ->
                                     drawRoundRect(
                                         color = p.surfaceSoft,
-                                        topLeft = Offset(0f, i * cellH + gap),
-                                        size = Size(size.width, cellH - gap * 2),
+                                        topLeft = Offset(x, i * cellH + gap),
+                                        size = Size(colW, cellH - gap * 2),
                                         cornerRadius = CornerRadius(r, r),
                                     )
                                 }
                             }
-                            .pointerInput(day, periodCount) {
-                                val cellH = rowHeight.dp.toPx()
-                                detectTapGestures { offset ->
-                                    val idx = (offset.y / cellH).toInt()
-                                    if (idx in 0 until periodCount) onEmptyClick(day)
+                        }
+                        .pointerInput(periodCount) {
+                            val cellH = rowHeight.dp.toPx()
+                            detectTapGestures { offset ->
+                                val colW = size.width / weekdays.size.toFloat()
+                                val day = (offset.x / colW).toInt() + 1
+                                val period = (offset.y / cellH).toInt() + 1
+                                if (day in 1..weekdays.size && period in 1..periodCount) onEmptyClick(day)
+                            }
+                        },
+                )
+                // 上层：透明的星期列，只承载课程块（硬阴影由 CourseBlock 自己绘制，
+                // 上层的列没有背景，因此不会遮挡相邻列的阴影）
+                Row(Modifier.fillMaxSize()) {
+                    weekdays.forEachIndexed { index, _ ->
+                        val day = index + 1
+                        Box(Modifier.weight(1f).fillMaxSize()) {
+                            coursesByDay[day].orEmpty().forEachIndexed { i, course ->
+                                key(course.id) {
+                                    val color = p.coursePalette[course.colorIndex % p.coursePalette.size]
+                                    AnimatedCourseBlock(
+                                        course = course,
+                                        color = color,
+                                        rowHeight = rowHeight,
+                                        offsetY = ((course.startPeriod - 1) * rowHeight).dp,
+                                        staggerMs = (index * 2 + i) * 40,
+                                        onClick = { onCourseClick(course) },
+                                    )
                                 }
-                            },
-                    )
-                    // 课程块：绘制在本列空格格之上，硬阴影由 CourseBlock 内部绘制
-                    coursesByDay[day].orEmpty().forEach { course ->
-                        val color = p.coursePalette[course.colorIndex % p.coursePalette.size]
-                        Box(
-                            Modifier
-                                .offset(y = ((course.startPeriod - 1) * rowHeight).dp)
-                                .fillMaxWidth(),
-                        ) {
-                            CourseBlock(course, color, rowHeight) { onCourseClick(course) }
+                            }
                         }
                     }
                 }
             }
         }
+    }
+}
+
+/** 课程块入场动画：淡入 + 轻微上移，按 staggerMs 交错出现（周切换丝滑感）。 */
+@Composable
+private fun AnimatedCourseBlock(
+    course: Course,
+    color: Color,
+    rowHeight: Int,
+    offsetY: Dp,
+    staggerMs: Int,
+    onClick: () -> Unit,
+) {
+    var appear by remember(course.id) { mutableStateOf(false) }
+    LaunchedEffect(course.id, course.startPeriod, course.endPeriod, course.name) {
+        delay(staggerMs.toLong())
+        appear = true
+    }
+    val progress by animateFloatAsState(
+        targetValue = if (appear) 1f else 0f,
+        animationSpec = tween(320, easing = FastOutSlowInEasing),
+        label = "courseBlockAppear",
+    )
+    Box(
+        Modifier
+            .offset(y = offsetY)
+            .fillMaxWidth()
+            .graphicsLayer {
+                alpha = progress
+                translationY = (1f - progress) * 10.dp.toPx()
+            },
+    ) {
+        CourseBlock(course, color, rowHeight, onClick)
     }
 }
