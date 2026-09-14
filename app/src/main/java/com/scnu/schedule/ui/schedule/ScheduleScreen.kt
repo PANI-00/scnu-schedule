@@ -89,7 +89,8 @@ fun ScheduleScreen(vm: ScheduleViewModel = hiltViewModel()) {
         (appContext.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
     }
 
-    // 入场动画只在「进入课表页」时播放一次：页内左右切周/跳周不再重播。
+    // 入场动画只在「进入课表页」时播放一次，且只针对进入时所在的那一周：
+    // 页内左右切周/跳周直接显示终态，不再重播。
     // 状态放在页面级（而不是每个课程块内部）：切到今日/我的页时本页会被销毁，
     // remember 随之重置，因此下次回到课表页会重新播放一次入场动画。
     var entranceAnimationDone by remember { mutableStateOf(false) }
@@ -115,11 +116,13 @@ fun ScheduleScreen(vm: ScheduleViewModel = hiltViewModel()) {
         }
 
         HorizontalPager(state = pagerState, beyondViewportPageCount = 1) { page ->
-            // page index p → week = p + 1
+            val week = page + 1
             WeeklyGrid(
                 state = state,
-                week = page + 1,
-                animateBlocks = !entranceAnimationDone,
+                week = week,
+                // 入场动画只属于「进入课表页时所在的那一周」：其它周直接显示终态。
+                // 这样页内切周不会重播动画，而且不依赖计时窗口（切得多快都不会误触发）。
+                animateBlocks = !entranceAnimationDone && week == state.initialWeek,
                 onEmptyClick = { day -> creatingDay = day },
                 onCourseClick = { course -> editing = course },
             )
