@@ -63,6 +63,13 @@ import kotlinx.coroutines.launch
 private val dateFormatter = DateTimeFormatter.ofPattern("MM/dd")
 private val weekdays = listOf("一", "二", "三", "四", "五")
 
+/** 课程块交错入场：相邻块的启动间隔与单个块的动画时长。 */
+private const val ENTRANCE_STAGGER_MS = 40
+private const val ENTRANCE_ANIM_MS = 320
+
+/** 入场动画总窗口：最后一个块的最长错峰 + 动画时长，之后页内切周直接显示终态。 */
+private const val ENTRANCE_WINDOW_MS = 1_200L
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ScheduleScreen(vm: ScheduleViewModel = hiltViewModel()) {
@@ -80,6 +87,15 @@ fun ScheduleScreen(vm: ScheduleViewModel = hiltViewModel()) {
     val appContext = LocalContext.current
     val isDebuggable = remember(appContext) {
         (appContext.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+    }
+
+    // 入场动画只在「进入课表页」时播放一次：页内左右切周/跳周不再重播。
+    // 状态放在页面级（而不是每个课程块内部）：切到今日/我的页时本页会被销毁，
+    // remember 随之重置，因此下次回到课表页会重新播放一次入场动画。
+    var entranceAnimationDone by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        delay(ENTRANCE_WINDOW_MS)
+        entranceAnimationDone = true
     }
 
     Column(Modifier.fillMaxSize()) {
@@ -100,7 +116,13 @@ fun ScheduleScreen(vm: ScheduleViewModel = hiltViewModel()) {
 
         HorizontalPager(state = pagerState, beyondViewportPageCount = 1) { page ->
             // page index p → week = p + 1
-            WeeklyGrid(state = state, week = page + 1, onEmptyClick = { day -> creatingDay = day }, onCourseClick = { course -> editing = course })
+            WeeklyGrid(
+                state = state,
+                week = page + 1,
+                animateBlocks = !entranceAnimationDone,
+                onEmptyClick = { day -> creatingDay = day },
+                onCourseClick = { course -> editing = course },
+            )
         }
 
         if (showJump) {
@@ -127,7 +149,13 @@ fun ScheduleScreen(vm: ScheduleViewModel = hiltViewModel()) {
 }
 
 @Composable
-private fun WeeklyGrid(state: ScheduleUiState, week: Int, onEmptyClick: (Int) -> Unit, onCourseClick: (Course) -> Unit) {
+private fun WeeklyGrid(
+    state: ScheduleUiState,
+    week: Int,
+    animateBlocks: Boolean,
+    onEmptyClick: (Int) -> Unit,
+    onCourseClick: (Course) -> Unit,
+) {
     val p = LocalAppPalette.current
     val rowHeight = 56
     // 本周日期 = weekDates(startDate, week - 1) —— 绝对周号，不是相对偏移
@@ -242,7 +270,8 @@ private fun WeeklyGrid(state: ScheduleUiState, week: Int, onEmptyClick: (Int) ->
                                         color = color,
                                         rowHeight = rowHeight,
                                         offsetY = ((course.startPeriod - 1) * rowHeight).dp,
-                                        staggerMs = (index * 2 + i) * 40,
+                                        staggerMs = (index * 2 + i) * ENTRANCE_STAGGER_MS,
+                                        animate = animateBlocks,
                                         onClick = { onCourseClick(course) },
                                     )
                                 }
@@ -255,7 +284,12 @@ private fun WeeklyGrid(state: ScheduleUiState, week: Int, onEmptyClick: (Int) ->
     }
 }
 
-/** 课程块入场动画：淡入 + 轻微上移，按 staggerMs 交错出现（周切换丝滑感）。 */
+/**
+ * 课程块入场动画：淡入 + 轻微上移，按 staggerMs 交错出现。
+ *
+ * [animate] 为 false 时（进入课表页的入场窗口已过）直接以终态显示，
+ * 因此页内左右切周、跳周都不会重播动画。
+ */
 @Composable
 private fun AnimatedCourseBlock(
     course: Course,
@@ -263,16 +297,22 @@ private fun AnimatedCourseBlock(
     rowHeight: Int,
     offsetY: Dp,
     staggerMs: Int,
+    animate: Boolean,
     onClick: () -> Unit,
 ) {
-    var appear by remember(course.id) { mutableStateOf(false) }
-    LaunchedEffect(course.id, course.startPeriod, course.endPeriod, course.name) {
-        delay(staggerMs.toLong())
-        appear = true
+    // 初始值取决于是否需要动画：不需要时直接就是终态，避免任何延迟与过渡
+    var appear by remember(course.id) { mutableStateOf(!animate) }
+    LaunchedEffect(course.id, animate) {
+        if (!animate) {
+            appear = true
+        } else {
+            delay(staggerMs.toLong())
+            appear = true
+        }
     }
     val progress by animateFloatAsState(
         targetValue = if (appear) 1f else 0f,
-        animationSpec = tween(320, easing = FastOutSlowInEasing),
+        animationSpec = tween(ENTRANCE_ANIM_MS, easing = FastOutSlowInEasing),
         label = "courseBlockAppear",
     )
     Box(
