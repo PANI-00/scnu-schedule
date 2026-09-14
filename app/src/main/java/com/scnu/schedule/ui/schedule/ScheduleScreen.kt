@@ -3,9 +3,9 @@ package com.scnu.schedule.ui.schedule
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,6 +31,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,6 +44,7 @@ import com.scnu.schedule.domain.logic.WeekCalculator
 import com.scnu.schedule.domain.model.Course
 import com.scnu.schedule.domain.model.WeekKind
 import com.scnu.schedule.domain.model.WeekPattern
+import com.scnu.schedule.ui.anim.FrameStatsChip
 import com.scnu.schedule.ui.theme.LocalAppPalette
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -73,6 +79,8 @@ fun ScheduleScreen(vm: ScheduleViewModel = hiltViewModel()) {
             Text("▸", color = p.primary, fontSize = 16.sp, modifier = Modifier.clickable {
                 scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
             })
+            Spacer(Modifier.width(8.dp))
+            FrameStatsChip()
         }
 
         HorizontalPager(state = pagerState, beyondViewportPageCount = 1) { page ->
@@ -141,59 +149,73 @@ private fun WeeklyGrid(state: ScheduleUiState, week: Int, onEmptyClick: (Int) ->
                 }
             }
         }
-        BoxWithConstraints(Modifier.fillMaxWidth().padding(top = 6.dp)) {
-            // 每列宽 = (总宽 - 时间列 40dp) / 5
-            val colWidth = (maxWidth - 40.dp) * 0.2f
-            // 空格格（可点新建课程）
-            Row(Modifier.fillMaxWidth()) {
-                Column(Modifier.width(40.dp)) {
-                    state.timetable?.periods?.forEach { period ->
-                        // 每格三行：节次气泡（紧凑，仅比数字略大）+ 开始时间 + 结束时间
-                        Column(
-                            Modifier.height(rowHeight.dp).fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center,
-                        ) {
-                            Text(
-                                "${period.periodIndex}",
-                                fontSize = 8.sp,
-                                lineHeight = 8.sp,   // 行高压到与字号一致：气泡只包住数字本身，上下不再虚高
-                                color = p.periodBadgeFg ?: p.onPrimary,
-                                modifier = Modifier
-                                    .background(p.periodBadgeBg ?: p.primary, RoundedCornerShape(p.periodBadgeRadius))
-                                    .padding(horizontal = 3.dp),
-                            )
-                            Text(period.startLabel(), fontSize = 10.sp, color = p.muted,
-                                modifier = Modifier.padding(top = 1.dp))
-                            Text(period.endLabel(), fontSize = 10.sp, color = p.mutedSoft)
-                        }
-                    }
-                }
-                weekdays.forEachIndexed { index, _ ->
-                    val day = index + 1
-                    Column(Modifier.weight(1f)) {
-                        state.timetable?.periods?.forEach { _ ->
-                            Box(Modifier.height(rowHeight.dp).fillMaxWidth().padding(vertical = 1.dp)
-                                .background(p.surfaceSoft, RoundedCornerShape(if (p.isDark) 2.dp else 8.dp))
-                                .clickable { onEmptyClick(day) })
-                        }
+        // 课程格子区域：不再使用 BoxWithConstraints（SubcomposeLayout 每页都会跑一次子组合），
+        // 星期列用 weight(1f) 自适应宽度，课程块直接落在所属列内，无需再算列宽与 x 偏移。
+        Row(Modifier.fillMaxWidth().padding(top = 6.dp)) {
+            Column(Modifier.width(40.dp)) {
+                state.timetable?.periods?.forEach { period ->
+                    // 每格三行：节次气泡（紧凑，仅比数字略大）+ 开始时间 + 结束时间
+                    Column(
+                        Modifier.height(rowHeight.dp).fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                    ) {
+                        Text(
+                            "${period.periodIndex}",
+                            fontSize = 8.sp,
+                            lineHeight = 8.sp,   // 行高压到与字号一致：气泡只包住数字本身，上下不再虚高
+                            color = p.periodBadgeFg ?: p.onPrimary,
+                            modifier = Modifier
+                                .background(p.periodBadgeBg ?: p.primary, RoundedCornerShape(p.periodBadgeRadius))
+                                .padding(horizontal = 3.dp),
+                        )
+                        Text(period.startLabel(), fontSize = 10.sp, color = p.muted,
+                            modifier = Modifier.padding(top = 1.dp))
+                        Text(period.endLabel(), fontSize = 10.sp, color = p.mutedSoft)
                     }
                 }
             }
-            // 顶层课程块层：绝对定位绘制在所有空格格之上（硬阴影在 CourseBlock 内绘制，
-            // 因此阴影在米纸实底下方、空格格背景上方，与浏览器预览层级一致）。
-            // 说明：这里不做逐块入场动画——分页器每次滑到新周都会重新组合整页，
-            // 逐块 delay + 动画会全部重跑，导致滑动/切周明显掉帧。
+            val periodCount = state.timetable?.periods?.size ?: 0
+            val cellRadius = if (p.isDark) 2.dp else 8.dp
             weekdays.forEachIndexed { index, _ ->
                 val day = index + 1
-                coursesByDay[day].orEmpty().forEach { course ->
-                    val color = p.coursePalette[course.colorIndex % p.coursePalette.size]
+                Box(Modifier.weight(1f).height((rowHeight * periodCount).dp)) {
+                    // 空格格：一次绘制 + 一个手势处理器，代替 50 个可点击 Box
+                    // （每页组合节点大幅减少；代价是空格格按下不再有涟漪反馈）
                     Box(
                         Modifier
-                            .offset(x = 40.dp + colWidth * index, y = ((course.startPeriod - 1) * rowHeight).dp)
-                            .width(colWidth),
-                    ) {
-                        CourseBlock(course, color, rowHeight) { onCourseClick(course) }
+                            .fillMaxSize()
+                            .drawBehind {
+                                val cellH = rowHeight.dp.toPx()
+                                val gap = 1.dp.toPx()
+                                val r = cellRadius.toPx()
+                                repeat(periodCount) { i ->
+                                    drawRoundRect(
+                                        color = p.surfaceSoft,
+                                        topLeft = Offset(0f, i * cellH + gap),
+                                        size = Size(size.width, cellH - gap * 2),
+                                        cornerRadius = CornerRadius(r, r),
+                                    )
+                                }
+                            }
+                            .pointerInput(day, periodCount) {
+                                val cellH = rowHeight.dp.toPx()
+                                detectTapGestures { offset ->
+                                    val idx = (offset.y / cellH).toInt()
+                                    if (idx in 0 until periodCount) onEmptyClick(day)
+                                }
+                            },
+                    )
+                    // 课程块：绘制在本列空格格之上，硬阴影由 CourseBlock 内部绘制
+                    coursesByDay[day].orEmpty().forEach { course ->
+                        val color = p.coursePalette[course.colorIndex % p.coursePalette.size]
+                        Box(
+                            Modifier
+                                .offset(y = ((course.startPeriod - 1) * rowHeight).dp)
+                                .fillMaxWidth(),
+                        ) {
+                            CourseBlock(course, color, rowHeight) { onCourseClick(course) }
+                        }
                     }
                 }
             }
