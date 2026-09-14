@@ -52,6 +52,8 @@ class CountdownWidget : GlanceAppWidget() {
         val dayCn = DAY_CN[now.dayOfWeek.value - 1]
         // 只取今天内下一节未开始的课；显示固定开始时间，不做倒计时
         val label = model?.let { "${WidgetFormatter.hhmm(it.startMinute)} 开始上课" } ?: ""
+        // 在下一节课开始的那一刻精确切换（每节课排一次闹钟，不是每分钟唤醒）
+        NextClassRefreshScheduler.schedule(context, data, now)
         provideContent {
             CountdownContent(model, "周$dayCn · 第${week}周", label, palette)
         }

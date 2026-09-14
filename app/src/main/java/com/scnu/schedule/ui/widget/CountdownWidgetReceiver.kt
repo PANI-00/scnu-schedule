@@ -1,15 +1,21 @@
 package com.scnu.schedule.ui.widget
 
+import android.content.Context
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 
 /**
  * 下一节 2×2 组件。
  *
- * 该组件只显示「下一节」的固定开始时间，不做秒/分级倒计时，
- * 因此刷新完全交给系统的 updatePeriodMillis（30 分钟）与数据变更时的统一刷新，
- * 不再使用每分钟精确闹钟。
+ * 组件只显示「下一节」的固定开始时间，不做秒/分级倒计时；
+ * 切换时机由 [NextClassRefreshScheduler] 在每节课开始的那一刻精确触发。
  */
 class CountdownWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = CountdownWidget()
+
+    override fun onDisabled(context: Context) {
+        super.onDisabled(context)
+        // 最后一个组件被移除后取消闹钟，避免空转
+        NextClassRefreshScheduler.cancel(context)
+    }
 }
