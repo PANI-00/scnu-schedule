@@ -1,8 +1,5 @@
 package com.scnu.schedule.ui.schedule
 
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -28,17 +25,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -49,7 +42,6 @@ import com.scnu.schedule.domain.model.WeekPattern
 import com.scnu.schedule.ui.theme.LocalAppPalette
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private val dateFormatter = DateTimeFormatter.ofPattern("MM/dd")
@@ -83,7 +75,7 @@ fun ScheduleScreen(vm: ScheduleViewModel = hiltViewModel()) {
             })
         }
 
-        HorizontalPager(state = pagerState) { page ->
+        HorizontalPager(state = pagerState, beyondViewportPageCount = 1) { page ->
             // page index p → week = p + 1
             WeeklyGrid(state = state, week = page + 1, onEmptyClick = { day -> creatingDay = day }, onCourseClick = { course -> editing = course })
         }
@@ -189,62 +181,22 @@ private fun WeeklyGrid(state: ScheduleUiState, week: Int, onEmptyClick: (Int) ->
                 }
             }
             // 顶层课程块层：绝对定位绘制在所有空格格之上（硬阴影在 CourseBlock 内绘制，
-            // 因此阴影在米纸实底下方、空格格背景上方，与浏览器预览层级一致）；
-            // 课程块交错淡入 + 轻微上移（丝滑入场）
+            // 因此阴影在米纸实底下方、空格格背景上方，与浏览器预览层级一致）。
+            // 说明：这里不做逐块入场动画——分页器每次滑到新周都会重新组合整页，
+            // 逐块 delay + 动画会全部重跑，导致滑动/切周明显掉帧。
             weekdays.forEachIndexed { index, _ ->
                 val day = index + 1
-                val dayCourses = coursesByDay[day].orEmpty()
-                dayCourses.forEachIndexed { i, course ->
-                    key("${course.id}:${course.name}:${course.dayOfWeek}:${course.startPeriod}:${course.endPeriod}") {
-                          val color = p.coursePalette[course.colorIndex % p.coursePalette.size]
-                    AnimatedCourseBlock(
-                        course = course,
-                        color = color,
-                        rowHeight = rowHeight,
-                        offsetX = 40.dp + colWidth * index,
-                        offsetY = ((course.startPeriod - 1) * rowHeight).dp,
-                        blockWidth = colWidth,
-                        staggerMs = (index * 2 + i) * 40,
-                        onClick = { onCourseClick(course) },
-                    )
-                      }
+                coursesByDay[day].orEmpty().forEach { course ->
+                    val color = p.coursePalette[course.colorIndex % p.coursePalette.size]
+                    Box(
+                        Modifier
+                            .offset(x = 40.dp + colWidth * index, y = ((course.startPeriod - 1) * rowHeight).dp)
+                            .width(colWidth),
+                    ) {
+                        CourseBlock(course, color, rowHeight) { onCourseClick(course) }
+                    }
                 }
             }
         }
-    }
-}
-
-/** 课程块入场动画：淡入 + 轻微上移，按 staggerMs 交错出现（周切换丝滑感） */
-@Composable
-private fun AnimatedCourseBlock(
-    course: Course,
-    color: Color,
-    rowHeight: Int,
-    offsetX: Dp,
-    offsetY: Dp,
-    blockWidth: Dp,
-    staggerMs: Int,
-    onClick: () -> Unit,
-) {
-    var appear by remember(course.id) { mutableStateOf(false) }
-    LaunchedEffect(course.id, course.startPeriod, course.endPeriod, course.name) {
-        delay(staggerMs.toLong())
-        appear = true
-    }
-    val progress = animateFloatAsState(
-        targetValue = if (appear) 1f else 0f,
-        animationSpec = tween(320, easing = FastOutSlowInEasing),
-        label = "courseBlockAppear",
-    )
-    Box(
-        Modifier
-            .offset(x = offsetX, y = offsetY)
-            .width(blockWidth)
-            .graphicsLayer {
-                alpha = progress.value
-                translationY = (1f - progress.value) * 10.dp.toPx()
-            },
-    ) {
-        CourseBlock(course, color, rowHeight, onClick)
     }
 }
