@@ -117,6 +117,12 @@ private fun WeeklyGrid(state: ScheduleUiState, week: Int, onEmptyClick: (Int) ->
     val rowHeight = 56
     // 本周日期 = weekDates(startDate, week - 1) —— 绝对周号，不是相对偏移
     val weekDates = state.semester?.let { WeekCalculator.weekDates(it.startDate, week - 1) }
+    // 每天本周课程：按 (课程表, 周次) 缓存，避免滑动/重组时对 5 天重复 filter + 单双周判断
+    val coursesByDay = remember(state.courses, week) {
+        (1..5).associateWith { day ->
+            WeekCalculator.coursesForWeek(state.courses.filter { it.dayOfWeek == day }, week)
+        }
+    }
 
     Column(Modifier.fillMaxSize().padding(horizontal = 10.dp).verticalScroll(rememberScrollState())) {
         // 日期条（周几 + 月日）：左侧预留 40dp 时间列占位，与下方课程空格格逐列对齐；
@@ -187,7 +193,7 @@ private fun WeeklyGrid(state: ScheduleUiState, week: Int, onEmptyClick: (Int) ->
             // 课程块交错淡入 + 轻微上移（丝滑入场）
             weekdays.forEachIndexed { index, _ ->
                 val day = index + 1
-                val dayCourses = WeekCalculator.coursesForWeek(state.courses.filter { it.dayOfWeek == day }, week)
+                val dayCourses = coursesByDay[day].orEmpty()
                 dayCourses.forEachIndexed { i, course ->
                     key("${course.id}:${course.name}:${course.dayOfWeek}:${course.startPeriod}:${course.endPeriod}") {
                           val color = p.coursePalette[course.colorIndex % p.coursePalette.size]
