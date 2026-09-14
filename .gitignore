@@ -5,6 +5,10 @@ build/
 
 # Local configuration
 local.properties
+# 正式签名配置（含密钥口令，绝不能入库）
+keystore.properties
+*.jks
+*.keystore
 
 # IDE
 .idea/
